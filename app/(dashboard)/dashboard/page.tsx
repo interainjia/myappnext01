@@ -3,9 +3,9 @@ import { BarChart3, PieChart, Activity, Briefcase } from 'lucide-react';
 
 export default function DashboardPage() {
   const stats = [
-    { label: '总项目数', value: '128', icon: Briefcase, color: 'text-blue-600' },
-    { label: '活跃动物模型', value: '3,420', icon: Activity, color: 'text-emerald-600' },
-    { label: '待处理分析', value: '12', icon: BarChart3, color: 'text-amber-600' },
+    { label: 'Total Projects', value: '128', icon: Briefcase, color: 'text-blue-600' },
+    { label: 'Active Animal Models', value: '3,420', icon: Activity, color: 'text-emerald-600' },
+    { label: 'Pending Analysis', value: '12', icon: BarChart3, color: 'text-amber-600' },
   ];
 
   return (
@@ -26,9 +26,9 @@ export default function DashboardPage() {
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-100 h-96 flex flex-col items-center justify-center text-slate-400 border-dashed border-2">
         <PieChart size={48} className="mb-4 opacity-20" />
-        <p>CanvasXpress 图表容器 (正在等待 API 数据...)</p>
+        <p>CanvasXpress Chart Container (Waiting for API data...)</p>
         <button className="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm transition-colors">
-          刷新过滤器数据
+          Refresh Filter Data
         </button>
       </div>
     </div>

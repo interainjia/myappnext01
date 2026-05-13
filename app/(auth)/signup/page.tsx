@@ -1,43 +1,135 @@
 "use client";
-import { useForm } from "react-hook-form";
-import { Mail, UserPlus, ShieldCheck } from "lucide-react";
-import Link from "next/link";
 
-interface SignUpData {
-  email?: string;
-  password?: string;
-}
+import React, { useState } from 'react';
+import { useForm, FieldValues } from "react-hook-form";
+import { Loader2, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
-  const { register, handleSubmit } = useForm<SignUpData>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const onSubmit = (data: SignUpData) => console.log("Sign Up:", data);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (values: FieldValues) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 对应 SKILL.md 中的注册接口 (LogOnVM)
+      const response = await fetch('/api/Account/logon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: values.email,
+          username: values.username,
+          password: values.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // 注册成功后跳转至登录页
+        router.push('/login');
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch {
+      setError('Network error. Please make sure the server is running.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
-      <h2 className="text-2xl font-bold text-center mb-6">创建新账号</h2>
+    <>
+      <div className="mb-2">
+        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+          Create Account
+        </h2>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">电子邮箱</label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 text-slate-400" size={18} />
-            <input type="email" {...register("email", { required: true })} className="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+        {error && (
+          <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+            {error}
           </div>
-        </div>
+        )}
+
+        {/* Username Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">设置密码</label>
-          <div className="relative">
-            <ShieldCheck className="absolute left-3 top-2.5 text-slate-400" size={18} />
-            <input type="password" {...register("password", { required: true })} className="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
+          <input
+            {...register("username", { required: "Please enter a username" })}
+            placeholder="Username"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+          />
+          {errors.username && (
+            <p className="text-xs text-red-500 mt-1">{errors.username.message as string}</p>
+          )}
         </div>
-        <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
-          <UserPlus size={18} /> 注册
+
+        {/* Email Field */}
+        <div>
+          <input
+            {...register("email", { 
+              required: "Please enter your email",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address"
+              }
+            })}
+            type="email"
+            placeholder="Email Address"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+          />
+          {errors.email && (
+            <p className="text-xs text-red-500 mt-1">{errors.email.message as string}</p>
+          )}
+        </div>
+
+        {/* Password Field */}
+        <div>
+          <input
+            {...register("password", { 
+              required: "Please set a password",
+              minLength: { value: 6, message: "Minimum 6 characters" }
+            })}
+            type="password"
+            placeholder="Password"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+          />
+          {errors.password && (
+            <p className="text-xs text-red-500 mt-1">{errors.password.message as string}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-12 mt-4 bg-[#4db694] hover:bg-[#3d9a7d] text-white rounded font-medium text-base transition-colors flex items-center justify-center uppercase tracking-wider gap-2"
+        >
+          {isLoading ? <Loader2 className="animate-spin" /> : (
+            <>
+              <UserPlus size={18} />
+              Register
+            </>
+          )}
         </button>
+
+        <div className="text-right mt-4 text-[15px] text-[#666]">
+          Already have an account?{' '}
+          <Link href="/login" className="text-[#7a94ff] hover:underline">
+            Sign In
+          </Link>
+        </div>
       </form>
-      <p className="mt-4 text-center text-sm">
-        已有账号？ <Link href="/login" className="text-blue-600">返回登录</Link>
-      </p>
-    </div>
+    </>
   );
 }

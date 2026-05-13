@@ -1,58 +1,110 @@
 "use client";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Send, ArrowLeft, KeyRound } from "lucide-react";
+
+import React, { useState } from 'react';
+import { useForm, FieldValues } from "react-hook-form";
+import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-interface ForgotPasswordFormData {
-  email?: string;
-  code?: string;
-  newPassword?: string;
-}
-
 export default function ForgotPasswordPage() {
-  const [step, setStep] = useState(1); // 1: 发送邮件, 2: 重置密码
-  const { register, handleSubmit } = useForm<ForgotPasswordFormData>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSendMail = (data: ForgotPasswordFormData) => {
-    console.log("Sending mail to:", data.email);
-    setStep(2);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (values: FieldValues) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 对应 SKILL.md 中的发送邮件接口
+      const response = await fetch('/api/Account/send-mail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsSent(true);
+      } else {
+        setError(data.message || 'Operation failed. Please try again.');
+      }
+    } catch {
+      setError('Network error. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const onReset = (data: ForgotPasswordFormData) => console.log("Resetting with:", data);
-
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
-      <div className="flex flex-col items-center mb-6">
-        <div className="p-3 bg-blue-50 rounded-full text-blue-600 mb-4">
-          <KeyRound size={32} />
-        </div>
-        <h2 className="text-2xl font-bold">找回密码</h2>
-        <p className="text-sm text-slate-500 text-center mt-2">
-          {step === 1 ? "输入您的注册邮箱，我们将为您发送验证码" : "请输入收到的验证码并设置新密码"}
+    <>
+      <div className="mb-4">
+        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+          Forgot Password
+        </h2>
+        <p className="text-sm text-[#666] text-center px-4">
+          {isSent 
+            ? "A password reset link has been sent to your email." 
+            : "Enter your email address and we'll send you a link to reset your password."}
         </p>
       </div>
 
-      {step === 1 ? (
-        <form onSubmit={handleSubmit(onSendMail)} className="space-y-4">
-          <input {...register("email", { required: true })} type="email" placeholder="email@example.com" className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-          <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
-            发送验证码 <Send size={18} />
+      {!isSent ? (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {error && (
+            <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-[#333] mb-1">Email Address</label>
+            <input
+              {...register("email", { 
+                required: "Please enter your email",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              })}
+              placeholder="Please enter your email"
+              className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+            />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">{errors.email.message as string}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 mt-4 bg-[#4db694] hover:bg-[#3d9a7d] text-white rounded font-medium text-base transition-colors flex items-center justify-center uppercase tracking-wider"
+          >
+            {isLoading ? <Loader2 className="animate-spin" /> : "Send Reset Link"}
           </button>
         </form>
       ) : (
-        <form onSubmit={handleSubmit(onReset)} className="space-y-4">
-          <input {...register("code", { required: true })} placeholder="验证码" className="w-full px-4 py-2 border rounded-lg outline-none" />
-          <input {...register("newPassword", { required: true })} type="password" placeholder="新密码" className="w-full px-4 py-2 border rounded-lg outline-none" />
-          <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold">重置密码</button>
-        </form>
+        <div className="mt-6 text-center">
+          <Link 
+            href="/login" 
+            className="inline-flex items-center justify-center px-6 py-2 border border-[#4db694] text-[#4db694] rounded hover:bg-[#4db694] hover:text-white transition-all"
+          >
+            Back to Login
+          </Link>
+        </div>
       )}
 
-      <div className="mt-6 text-center">
-        <Link href="/login" className="text-sm text-slate-500 hover:text-blue-600 flex items-center justify-center gap-1">
-          <ArrowLeft size={14} /> 返回登录
+      <div className="text-right mt-6">
+        <Link href="/login" className="text-[#7a94ff] text-[15px] hover:underline flex items-center justify-end gap-1">
+          <ArrowLeft size={14} /> Return to Login
         </Link>
       </div>
-    </div>
+    </>
   );
 }

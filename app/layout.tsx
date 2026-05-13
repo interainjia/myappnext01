@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+console.log('Current API URL:', process.env.NEXT_PUBLIC_API_URL);
+
 export const metadata: Metadata = {
-  title: "BioData Portal",
-  description: "Scientific Data Management System",
+  title: 'Crown Bioscience',
+  description: "Crown Bioscience Scientific Data Management System"
 };
 
 export default function RootLayout({

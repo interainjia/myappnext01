@@ -1,49 +1,119 @@
 "use client";
+
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { User, Lock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
-interface LoginFormData {
-  username?: string;
-  password?: string;
-}
-
 export default function LoginPage() {
-  const router = useRouter();
-  const { register, handleSubmit } = useForm<LoginFormData>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (data: LoginFormData) => {
-    // 模拟调用 /api/Account/login
-    console.log("Login Data:", data);
-    router.push("/dashboard");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (values: any) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const payload = {
+        user: values.username,
+        passwd: values.password
+      };
+
+      const response = await fetch('/api/Account/Login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.token) {
+        // 1. Store the JWT and Refresh Token
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('refreshToken', data.refresh_Token);
+        
+        // 2. STORE THE USERNAME
+        localStorage.setItem('userName', values.username); 
+
+        // 3. REDIRECT: Using window.location to force a fresh state load
+        const urlParams = new URL(window.location.href).searchParams;
+        const redirectUrl = urlParams.get('redirect') || '/dashboard';
+        window.location.href = redirectUrl;
+      } else {
+        setError(data.message || 'Login failed. Please check credentials.');
+      }
+    } catch (err) {
+      setError('Network error. Please make sure the backend server is running.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
-      <h2 className="text-2xl font-bold text-center mb-6">系统登录</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">用户名</label>
-          <div className="relative">
-            <User className="absolute left-3 top-2.5 text-slate-400" size={18} />
-            <input {...register("username", { required: true })} className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">密码</label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 text-slate-400" size={18} />
-            <input type="password" {...register("password", { required: true })} className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-          </div>
-        </div>
-        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-colors">
-          进入系统
-        </button>
-      </form>
-      <div className="mt-4 text-center text-sm text-slate-500">
-        没有账号？ <Link href="/signup" className="text-blue-600 hover:underline">立即注册</Link>
+    <>
+      <div className="mb-2">
+        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+          Sign In
+        </h2>
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {error && (
+          <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+            {error}
+          </div>
+        )}
+
+        <div>
+          <input
+            {...register("username", { required: "Please enter your username" })}
+            placeholder="UserName"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+          />
+          {errors.username && (
+            <p className="text-xs text-red-500 mt-1">{errors.username.message as string}</p>
+          )}
+        </div>
+
+        <div>
+          <input
+            {...register("password", { required: "Please enter your password" })}
+            type="password"
+            placeholder="******"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+          />
+          {errors.password && (
+            <p className="text-xs text-red-500 mt-1">{errors.password.message as string}</p>
+          )}
+        </div>
+
+        <div className="text-right mt-4">
+          <Link href="/user/forgot-password" size="sm" className="text-[#7a94ff] text-[15px] hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-12 mt-4 bg-[#4db694] hover:bg-[#3d9a7d] text-white rounded font-medium text-base transition-colors flex items-center justify-center uppercase tracking-wider"
+        >
+          {isLoading ? <Loader2 className="animate-spin" /> : "LOG IN"}
+        </button>
+
+        <div className="text-right mt-2 text-sm text-[#666]">
+          Don't have an account?{' '}
+          <Link href="/signup" className="text-[#7a94ff] hover:underline">
+            Create an account
+          </Link>
+        </div>
+      </form>
+    </>
   );
 }
