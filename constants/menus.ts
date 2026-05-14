@@ -29,6 +29,11 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: LayoutDashboard 
   },
   { 
+    name: 'Project List', 
+    path: '/projects', 
+    icon: Table 
+  },
+  { 
     name: 'Configuration', 
     path: '/configuration', 
     icon: Settings,
@@ -36,13 +41,11 @@ export const MENU_ITEMS: MenuItem[] = [
     // 逻辑：如果是开发环境，则强制显示，方便调试
     hideInMenu: !isDev, 
     routes: [
-      { name: 'User Settings', path: '/configuration/users' },
-      { name: 'System Settings', path: '/configuration/system' },
+      { name: 'Menus', path: '/configuration/menu' },
+      { name: 'Permissions', path: '/configuration/permission' },
+      { name: 'Roles', path: '/configuration/role' },
+      { name: 'Users', path: '/configuration/users' },
+      { name: 'Projects', path: '/configuration/projects' },
     ]
-  },
-  { 
-    name: 'Project List', 
-    path: '/projects', 
-    icon: Table 
   },
 ];
