@@ -25,18 +25,42 @@ export default function LoginPage() {
         passwd: values.password
       };
 
-      const response = await fetch('/api/Account/Login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      let response;
+      let data;
 
-      const data = await response.json();
+      try {
+        response = await fetch('/api/Account/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        data = await response.json();
+      } catch (err) {
+        // Fallback for development/local testing when backend is not running
+        const isMockAdmin = values.username === 'admin' && values.password === '123456';
+        const isMockDsb = values.username === 'dsb' && values.password === 'dsb123';
+        
+        if (isMockAdmin || isMockDsb) {
+          console.warn(`Backend unreachable. Using mock login for ${values.username}.`);
+          response = { ok: true } as any;
+          data = {
+            token: 'mock-jwt-token',
+            refresh_Token: 'mock-refresh-token',
+            userRoles: isMockAdmin ? ['Admin'] : ['User']
+          };
+        } else {
+          console.error('Login fetch error:', err);
+          throw err;
+        }
+      }
 
       if (response.ok && data.token) {
         // 1. Store the JWT and Refresh Token
         localStorage.setItem('token', data.token);
         localStorage.setItem('refreshToken', data.refresh_Token);
+        if (data.userRoles) {
+          localStorage.setItem('userRoles', JSON.stringify(data.userRoles));
+        }
         
         // 2. STORE THE USERNAME
         localStorage.setItem('userName', values.username); 

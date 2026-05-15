@@ -62,3 +62,9 @@ app/
 │   ├── layout.tsx        <-- 包含侧边栏的布局
 │   └── page.tsx          <-- 访问路径: /dashboard
 └── layout.tsx            <-- 全局根布局
+
+## 8. 交付标准
+- 代码必须符合 TypeScript 类型安全。
+- UI 必须响应式，适配移动设备。
+- 组件必须可重用，遵循 DRY 原则。
+- 所有 API 调用必须封装在 `@/lib/api-client` 中，并处理错误和加载状态。
