@@ -15,7 +15,8 @@
    * 交互动效：添加了平滑的淡入效果 (animate-in fade-in) 和悬停交互。
 
   您现在可以启动开发服务器并访问 /home 路径查看效果。
-  
+---
+---
   # 2026.05.14
   1. 已经修复了菜单图标不显示的问题。
 
@@ -53,7 +54,8 @@
    21     </div>
    22   );
    23 })}
-
+   
+---
   2. 现在，导航栏中的 Home、Dashboard、Configuration 和 Project List 菜单项都将正确显示对应的Lucide 图标。
 
   已经在 Configuration 菜单下成功添加了您要求的 6 个子菜单，并同步创建了对应的占位页面：
@@ -76,7 +78,7 @@
   现在您可以刷新页面，在 Configuration
   下拉菜单中查看并点击这些新项。所有的路由都已经打通，不会出现 404 错误。
 
-
+---
   3. 我已完成对系统的修复与调整。主要改动如下：
 
    1. 修复报错页面：修复了 app/(dashboard)/layout.tsx 文件中的严重语法错误。该文件之前在
@@ -101,3 +103,32 @@
      在导航栏中更加显眼且比例协调。
 
   现在 Logo 看起来会比之前更加醒目。
+---
+---
+#  2026.05.15
+  1. 已经在 app/(dashboard)/layout.tsx 中实现了 Token 过期检查逻辑。该逻辑会应用于 Dashboard、Project List 和
+  Configuration 中的所有页面，但会自动跳过 Home 页面（路径为 /home）。
+
+  实现细节：
+   1. 自动检测：在页面加载或路由切换时，系统会自动检查 localStorage 中的 token。
+   2. JWT 解析：如果 token 是标准的 JWT 格式，它会解析其中的 exp（过期时间）字段进行校验。
+   3. 过期提醒：一旦发现 Token 缺失或已过期，会弹出英文提示框：
+      > "Your login information has expired, please log in again."
+   4. 自动跳转：用户点击弹窗中的 "OK" 后，系统会清空本地缓存并跳转至 /login 登录页面。
+   5. 白名单机制：通过 pathname === '/home' 逻辑，确保主页不会触发此过期检查。
+
+  你可以通过手动删除浏览器的 localStorage 中的 token 或等待 Token 自然过期来测试此功能。
+
+---
+  2. 已经在 app/(dashboard)/layout.tsx 中实现了 Token 过期检查逻辑。该逻辑会应用于 Dashboard、Project List 和
+  Configuration 中的所有页面，但会自动跳过 Home 页面（路径为 /home）。
+
+  实现细节：
+   1. 自动检测：在页面加载或路由切换时，系统会自动检查 localStorage 中的 token。
+   2. JWT 解析：如果 token 是标准的 JWT 格式，它会解析其中的 exp（过期时间）字段进行校验。
+   3. 过期提醒：一旦发现 Token 缺失或已过期，会弹出英文提示框：
+      > "Your login information has expired, please log in again."
+   4. 自动跳转：用户点击弹窗中的 "OK" 后，系统会清空本地缓存并跳转至 /login 登录页面。
+   5. 白名单机制：通过 pathname === '/home' 逻辑，确保主页不会触发此过期检查。
+
+  你可以通过手动删除浏览器的 localStorage 中的 token 或等待 Token 自然过期来测试此功能。

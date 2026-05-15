@@ -26,6 +26,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setUserAccess(getAccess(roles));
   }, []);
 
+  // Token expiration check
+  useEffect(() => {
+    if (!mounted) return;
+
+    const token = localStorage.getItem('token');
+    const isHome = pathname === '/home';
+
+    if (!isHome) {
+      let isExpired = !token;
+      
+      // Basic JWT expiration check if it's a JWT
+      if (token && token.includes('.')) {
+        try {
+          const payloadBase64 = token.split('.')[1];
+          const decodedPayload = JSON.parse(window.atob(payloadBase64));
+          if (decodedPayload.exp && Date.now() >= decodedPayload.exp * 1000) {
+            isExpired = true;
+          }
+        } catch (e) {
+          console.error('Error decoding token:', e);
+        }
+      }
+
+      if (isExpired) {
+        alert("Your login information has expired, please log in again.");
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    }
+  }, [mounted, pathname]);
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = '/login';
