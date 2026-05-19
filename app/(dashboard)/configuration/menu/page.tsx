@@ -24,7 +24,7 @@ export default function MenuManagementPage() {
   const fetchMenus = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/Menu/all-actions', {
+      const res = await fetch('/api/Menu/parents', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -114,19 +114,71 @@ function MenuRow({ node, level, onEdit, onDelete }: {
   onEdit: (n: MenuNode) => void; 
   onDelete: (id: number) => void;
 }) {
-  const [isExpanded, setIsExpanded] = useState(true);
-  // @ts-ignore - 兼容后端不同的字段名
-  const children = node.childMenuList || node.children || [];
-  const hasChildren = children.length > 0;
+  // 如果后端初始返回了 children，则默认使用；否则初始化为空数组
+  const initialChildren = node.childMenuList || (node as any).children || [];
+  
+  const [isExpanded, setIsExpanded] = useState(level === 0 && initialChildren.length > 0); // 默认展开已有子节点的父菜单
+  const [localChildren, setLocalChildren] = useState<MenuNode[]>(initialChildren);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 处理展开/收起逻辑
+  const handleToggleExpand = async () => {
+    // 如果是收起操作，直接收起
+    if (isExpanded) {
+      setIsExpanded(false);
+      return;
+    }
+
+    // 如果准备展开，且本地已经有数据了，直接展开
+    if (localChildren.length > 0) {
+      setIsExpanded(true);
+      return;
+    }
+
+    // 如果准备展开，但没有数据，则发起 API 请求动态获取子菜单
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/Menu/sub/${node.tid}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      
+      const result = await res.json();
+      
+      // 兼容后端不同返回格式
+      let fetchedChildren = [];
+      if (result.status === "Ok" || result.status === "OK" || result.success === true) {
+        fetchedChildren = result.data || [];
+      } else if (Array.isArray(result)) {
+        fetchedChildren = result;
+      } else if (Array.isArray(result.data)) {
+        fetchedChildren = result.data;
+      }
+      
+      setLocalChildren(fetchedChildren);
+      setIsExpanded(true);
+    } catch (error) {
+      console.error("Fetch sub-menus error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const hasChildrenDisplay = localChildren.length > 0 || level === 0; // 假设顶级菜单都可以尝试展开
 
   return (
     <>
       <tr className="hover:bg-slate-50/80 group border-b border-slate-50">
+        {/* 左侧：菜单结构名称 */}
         <td className="px-6 py-4">
           <div className="flex items-center" style={{ paddingLeft: `${level * 20}px` }}>
-            {hasChildren ? (
-              <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 mr-1 text-slate-400">
-                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {hasChildrenDisplay ? (
+              <button 
+                onClick={handleToggleExpand} 
+                disabled={isLoading}
+                className="p-1 mr-1 text-slate-400 hover:text-slate-600 disabled:opacity-50"
+              >
+                {isLoading ? <Loader2 size={14} className="animate-spin" /> : (isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />)}
               </button>
             ) : <span className="w-6" />}
             <span className={`text-sm ${level === 0 ? 'font-bold text-slate-700' : 'text-slate-600'}`}>
@@ -134,21 +186,52 @@ function MenuRow({ node, level, onEdit, onDelete }: {
             </span>
           </div>
         </td>
+        
+        {/* 路径 */}
         <td className="px-6 py-4 text-xs font-mono text-slate-400">{node.url}</td>
+        
+        {/* 排序 */}
         <td className="px-6 py-4 text-center text-sm text-slate-500">{node.orderRule}</td>
+        
+        {/* 右侧：操作按钮 */}
         <td className="px-6 py-4 text-right">
-          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => onEdit(node)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded"><Pencil size={14} /></button>
-            <button onClick={() => onDelete(node.tid)} className="p-1.5 text-red-500 hover:bg-red-50 rounded"><Trash2 size={14} /></button>
+          {/* 移除了 opacity-0 group-hover:opacity-100，让按钮像图2一样常驻显示，体验更好 */}
+          <div className="flex justify-end items-center gap-2">
+            
+            {/* 新增的 Expand/Collapse 按钮，图2风格 */}
+            {level === 0 && ( // 假设只给顶级菜单（或根据需要去掉条件给所有菜单）显示此按钮
+              <button 
+                onClick={handleToggleExpand}
+                disabled={isLoading}
+                className={`px-3 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${
+                  isExpanded 
+                    ? 'bg-orange-100 text-orange-600 hover:bg-orange-200' // 展开状态（类似图2的折叠按钮橘色）
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'        // 未展开状态
+                }`}
+              >
+                {isLoading ? <Loader2 size={12} className="animate-spin" /> : null}
+                {isExpanded ? 'Collapse' : 'Expand'}
+              </button>
+            )}
+
+            <button onClick={() => onEdit(node)} className="p-1.5 text-white bg-blue-400 hover:bg-blue-500 rounded shadow-sm transition-colors">
+              <Pencil size={14} />
+            </button>
+            <button onClick={() => onDelete(node.tid)} className="p-1.5 text-white bg-red-400 hover:bg-red-500 rounded shadow-sm transition-colors">
+              <Trash2 size={14} />
+            </button>
           </div>
         </td>
       </tr>
-      {isExpanded && hasChildren && children.map((child, index) => (
+      
+      {/* 递归渲染子节点 */}
+      {isExpanded && localChildren.map((child, index) => (
         <MenuRow 
           key={`${child.tid}-${index}`} 
           node={child} 
           level={level + 1} 
           onEdit={onEdit} 
+          deletable // 如果需要区分
           onDelete={onDelete} 
         />
       ))}

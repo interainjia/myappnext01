@@ -132,3 +132,36 @@
    5. 白名单机制：通过 pathname === '/home' 逻辑，确保主页不会触发此过期检查。
 
   你可以通过手动删除浏览器的 localStorage 中的 token 或等待 Token 自然过期来测试此功能。
+
+  ---
+  ---
+  # 2026.05.19
+  1. 已将 app/(dashboard)/configuration/menu/page.tsx 的内容复制到
+  app/(dashboard)/configuration/permission/page.tsx 中。
+
+  主要改动如下：
+   1. API 路径更新：将 fetch 请求中的 /api/Menu/all-actions 修改为 /api/Menu/parents。
+   2. 组件重命名：将导出的组件名从 MenuManagementPage 修改为 PermissionManagementPage。
+   3. UI 文本更新：将页面标题和表格标题中的 "Menu" 改为 "Permission"，使其更符合权限管理页面的语境。
+
+   4. 外层 div：改成了 <div className="flex justify-end items-center gap-2">，去掉了依赖父级 hover 才显示的逻辑。
+
+   Edit 按钮：使用了 bg-blue-400 text-white shadow-sm，鼠标悬浮时颜色加深为 hover:bg-blue-500。
+
+   Delete 按钮：使用了 bg-red-400 text-white shadow-sm，鼠标悬浮时颜色加深为 hover:bg-red-500。
+
+   Tooltip：顺手加上了 title="Edit" 和 title="Delete"，这样鼠标放上去会有原生的文字提示，体验更好。
+
+--
+   2. 已修复 role/page.tsx 中点击 "Add Role" 和 "Edit Role" 按钮可能导致的报错问题。
+
+  主要修复内容：
+   1. API 响应安全性增强：为所有 fetch 请求添加了类型校验，确保返回的数据在调用 .map() 或 new Set()
+      之前确实是数组格式，防止因后端返回错误对象而导致的前端崩溃。
+   2. ID 比较兼容性：在 find 查找目标角色时，将 ID 统一转换为字符串进行比较 (String(r.tid) ===
+      String(selectedRoleId))，以处理 API 返回的 ID 类型（数字或字符串）不一致的问题。
+   3. 表单值空值处理：确保 formData 中的 description 等字段在为 null 时回退为空字符串 ''，避免 React
+      受控组件因接收到 null 而报错。
+   4. 加载状态闭环：在 handleOpenModal 中增加了错误分支的 setTreeLoading(false)
+      调用，确保即使发生错误，界面也不会卡在加载动画中。
+   5. 权限树组件健壮性：增强了递归树组件对子节点的校验。
