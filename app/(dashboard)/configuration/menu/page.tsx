@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Save, X, Loader2 } from 'lucide-react';
 
-// 1. 类型定义
+// 1. Get the base URL from your .env.development
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+
+// 2. 类型定义
 interface MenuNode {
   tid: number;
   parentTid: number;
@@ -20,26 +23,29 @@ export default function MenuManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Partial<MenuNode> | null>(null);
 
-  // 2. 获取数据并处理格式
+  // 3. 获取数据并处理格式
   const fetchMenus = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/Menu/parents', {
+      // ✅ FIX: Using absolute URL
+      const res = await fetch(`${API_BASE}/api/Menu/parents`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       
       const result = await res.json();
-      // 兼容多种返回格式: {status: "Ok", data: []} 或 {success: true, data: []} 或 直接返回数组
+      
+      let data: MenuNode[] = [];
       if (result.status === "Ok" || result.status === "OK" || result.success === true) {
-        setMenus(result.data || []);
+        data = Array.isArray(result.data) ? result.data : [];
       } else if (Array.isArray(result)) {
-        setMenus(result);
+        data = result;
       } else if (Array.isArray(result.data)) {
-        setMenus(result.data);
+        data = result.data;
       } else {
         console.warn("Unexpected API response format:", result);
       }
+      setMenus(data);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
@@ -47,13 +53,17 @@ export default function MenuManagementPage() {
     }
   };
 
-  useEffect(() => { fetchMenus(); }, []);
+  useEffect(() => {
+    fetchMenus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // 3. 删除逻辑
+  // 4. 删除逻辑
   const handleDelete = async (id: number) => {
     if (!confirm("Confirm to disable this menu?")) return;
     try {
-      const res = await fetch(`/api/Menu/${id}`, { 
+      // ✅ FIX: Using absolute URL
+      const res = await fetch(`${API_BASE}/api/Menu/${id}`, { 
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -102,12 +112,12 @@ export default function MenuManagementPage() {
         </table>
       </div>
       
-      {/* 弹窗部分省略，可参考上一次回复中的 Form 结构 */}
+      {/* 弹窗部分省略 */}
     </div>
   );
 }
 
-// 4. 递归行组件
+// 5. 递归行组件
 function MenuRow({ node, level, onEdit, onDelete }: { 
   node: MenuNode; 
   level: number; 
@@ -138,7 +148,8 @@ function MenuRow({ node, level, onEdit, onDelete }: {
     // 如果准备展开，但没有数据，则发起 API 请求动态获取子菜单
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/Menu/sub/${node.tid}`, {
+      // ✅ FIX: Using absolute URL
+      const res = await fetch(`${API_BASE}/api/Menu/sub/${node.tid}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -195,18 +206,16 @@ function MenuRow({ node, level, onEdit, onDelete }: {
         
         {/* 右侧：操作按钮 */}
         <td className="px-6 py-4 text-right">
-          {/* 移除了 opacity-0 group-hover:opacity-100，让按钮像图2一样常驻显示，体验更好 */}
           <div className="flex justify-end items-center gap-2">
             
-            {/* 新增的 Expand/Collapse 按钮，图2风格 */}
-            {level === 0 && ( // 假设只给顶级菜单（或根据需要去掉条件给所有菜单）显示此按钮
+            {level === 0 && (
               <button 
                 onClick={handleToggleExpand}
                 disabled={isLoading}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${
                   isExpanded 
-                    ? 'bg-orange-100 text-orange-600 hover:bg-orange-200' // 展开状态（类似图2的折叠按钮橘色）
-                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'        // 未展开状态
+                    ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                 }`}
               >
                 {isLoading ? <Loader2 size={12} className="animate-spin" /> : null}
@@ -231,7 +240,6 @@ function MenuRow({ node, level, onEdit, onDelete }: {
           node={child} 
           level={level + 1} 
           onEdit={onEdit} 
-          deletable // 如果需要区分
           onDelete={onDelete} 
         />
       ))}

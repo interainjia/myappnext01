@@ -6,6 +6,9 @@ import { Loader2, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// ✅ 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +25,8 @@ export default function SignUpPage() {
     setError(null);
 
     try {
-      // 对应 SKILL.md 中的注册接口 (LogOnVM)
-      const response = await fetch('/api/Account/logon', {
+      // ✅ 加上 API_BASE 绝对路径前缀
+      const response = await fetch(`${API_BASE}/api/Account/logon`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -42,7 +45,7 @@ export default function SignUpPage() {
         setError(data.message || 'Registration failed. Please try again.');
       }
     } catch {
-      setError('Network error. Please make sure the server is running.');
+      setError('Network error. Please make sure the server is running and CORS is enabled.');
     } finally {
       setIsLoading(false);
     }

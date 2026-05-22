@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Save, X, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+
+// ✅ 2. 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // 1. 类型定义
 interface MenuNode {
@@ -19,14 +23,28 @@ export default function PermissionManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Partial<MenuNode> | null>(null);
+  
+  const router = useRouter(); // ✅ 3. 初始化 router
 
   // 2. 获取数据并处理格式
   const fetchMenus = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/Menu/all-actions', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      const token = localStorage.getItem('token');
+      
+      // ✅ 4. 使用 API_BASE 拼接绝对路径
+      const res = await fetch(`${API_BASE}/api/Menu/all-actions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      // ✅ 5. 处理 401 未授权 (Token 失效或缺失)
+      if (res.status === 401) {
+        console.warn("Unauthorized. Token is missing or expired. Redirecting to login...");
+        localStorage.removeItem('token');
+        router.push('/login');
+        return;
+      }
+
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       
       const result = await res.json();
@@ -47,16 +65,29 @@ export default function PermissionManagementPage() {
     }
   };
 
-  useEffect(() => { fetchMenus(); }, []);
+  useEffect(() => { 
+    fetchMenus(); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 3. 删除逻辑
   const handleDelete = async (id: number) => {
     if (!confirm("Confirm to disable this menu?")) return;
     try {
-      const res = await fetch(`/api/Menu/${id}`, { 
+      const token = localStorage.getItem('token');
+      
+      // ✅ 6. 删除接口同样补全 API_BASE 并处理 401
+      const res = await fetch(`${API_BASE}/api/Menu/${id}`, { 
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
+
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        router.push('/login');
+        return;
+      }
+
       if (res.ok) fetchMenus();
     } catch (error) {
       console.error("Delete error:", error);
@@ -116,7 +147,7 @@ function MenuRow({ node, level, onEdit, onDelete }: {
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   // @ts-ignore - 兼容后端不同的字段名
-  const children = node.childMenuList || node.children || [];
+  const children: MenuNode[] = node.childMenuList || (node as any).children || [];
   const hasChildren = children.length > 0;
 
   return (

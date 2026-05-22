@@ -5,6 +5,9 @@ import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
+// 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,60 +23,49 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      // 注意：确保这里的字段名 (user/passwd) 与你后端 Swagger 接口要求的一致
+      // 如果后端要求的是 username 和 password，请在此处修改
       const payload = {
         user: values.username,
         passwd: values.password
       };
 
-      let response;
-      let data;
+      // 1. 直接调用真实 API，不再使用 try-catch 包裹 mock 逻辑
+      const response = await fetch(`${API_BASE}/api/Account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-      try {
-        response = await fetch('/api/Account/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        data = await response.json();
-      } catch (err) {
-        // Fallback for development/local testing when backend is not running
-        const isMockAdmin = values.username === 'admin' && values.password === '123456';
-        const isMockDsb = values.username === 'dsb' && values.password === 'dsb123';
-        
-        if (isMockAdmin || isMockDsb) {
-          console.warn(`Backend unreachable. Using mock login for ${values.username}.`);
-          response = { ok: true } as any;
-          data = {
-            token: 'mock-jwt-token',
-            refresh_Token: 'mock-refresh-token',
-            userRoles: isMockAdmin ? ['Admin'] : ['User']
-          };
-        } else {
-          console.error('Login fetch error:', err);
-          throw err;
-        }
-      }
+      const data = await response.json();
 
       if (response.ok && data.token) {
-        // 1. Store the JWT and Refresh Token
+        // 2. 存储真实的 Token
         localStorage.setItem('token', data.token);
-        localStorage.setItem('refreshToken', data.refresh_Token);
+        
+        // 兼容后端返回字段名的不同命名习惯 (refreshToken 或 refresh_Token)
+        if (data.refresh_Token || data.refreshToken) {
+            localStorage.setItem('refreshToken', data.refresh_Token || data.refreshToken);
+        }
+        
         if (data.userRoles) {
           localStorage.setItem('userRoles', JSON.stringify(data.userRoles));
         }
         
-        // 2. STORE THE USERNAME
+        // 3. 存储用户名
         localStorage.setItem('userName', values.username); 
 
-        // 3. REDIRECT: Using window.location to force a fresh state load
+        // 4. 重定向
         const urlParams = new URL(window.location.href).searchParams;
         const redirectUrl = urlParams.get('redirect') || '/dashboard';
         window.location.href = redirectUrl;
       } else {
+        // 如果后端返回 400/401 错误，显示后端的错误信息
         setError(data.message || 'Login failed. Please check credentials.');
       }
     } catch (err) {
-      setError('Network error. Please make sure the backend server is running.');
+      console.error('Login error:', err);
+      setError('Network error. Please make sure the backend server is running and CORS is enabled.');
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +110,7 @@ export default function LoginPage() {
         </div>
 
         <div className="text-right mt-4">
-          <Link href="/user/forgot-password" size="sm" className="text-[#7a94ff] text-[15px] hover:underline">
+          <Link href="/user/forgot-password" className="text-[#7a94ff] text-[15px] hover:underline">
             Forgot password?
           </Link>
         </div>

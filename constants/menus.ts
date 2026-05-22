@@ -38,8 +38,6 @@ export const MENU_ITEMS: MenuItem[] = [
     path: '/configuration', 
     icon: Settings,
     access: 'isAdmin',
-    // 逻辑：如果是开发环境，则强制显示，方便调试
-    hideInMenu: !isDev, 
     routes: [
       { name: 'Menus', path: '/configuration/menu' },
       { name: 'Permissions', path: '/configuration/permission' },

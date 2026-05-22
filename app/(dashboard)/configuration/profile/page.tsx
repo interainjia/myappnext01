@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Save, Key, User, Loader2, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+
+// ✅ 2. 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function MyProfilePage() {
   // === State Management ===
@@ -23,13 +27,24 @@ export default function MyProfilePage() {
   });
   const [savingPassword, setSavingPassword] = useState(false);
 
+  const router = useRouter(); // ✅ 3. 初始化 router
+
+  // ✅ 统一的 401 处理函数
+  const handleUnauthorized = () => {
+    console.warn("Unauthorized. Token is missing or expired. Redirecting to login...");
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
+
   // === Data Fetching ===
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('/api/Account/profile', {
+        const res = await fetch(`${API_BASE}/api/Account/profile`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
+        
+        if (res.status === 401) return handleUnauthorized();
         if (!res.ok) throw new Error("Failed to fetch profile");
         
         const result = await res.json();
@@ -48,6 +63,7 @@ export default function MyProfilePage() {
     };
 
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // === Event Handlers ===
@@ -60,7 +76,7 @@ export default function MyProfilePage() {
 
     setSavingProfile(true);
     try {
-      const res = await fetch('/api/Account/info', {
+      const res = await fetch(`${API_BASE}/api/Account/info`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -72,7 +88,9 @@ export default function MyProfilePage() {
         })
       });
       
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Failed to update profile");
+      
       alert("Profile updated successfully!");
     } catch (error) {
       console.error(error);
@@ -93,7 +111,7 @@ export default function MyProfilePage() {
 
     setSavingPassword(true);
     try {
-      const res = await fetch('/api/Account/password', {
+      const res = await fetch(`${API_BASE}/api/Account/password`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -105,6 +123,8 @@ export default function MyProfilePage() {
         })
       });
       
+      if (res.status === 401) return handleUnauthorized();
+      
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.message || "Failed to change password");
@@ -113,9 +133,9 @@ export default function MyProfilePage() {
       alert("Password updated successfully! Please log out and log in again.");
       setPasswordData({ oldPwd: '', pwd: '', pwd2: '' }); // Clear form
       
-      // Optional: Redirect to login or auto-logout here
-      // localStorage.removeItem('token');
-      // window.location.href = '/login';
+      // ✅ 密码修改成功后自动清除 Token 并跳转到登录页，强制重新登录
+      localStorage.removeItem('token');
+      router.push('/login');
       
     } catch (error: any) {
       console.error(error);

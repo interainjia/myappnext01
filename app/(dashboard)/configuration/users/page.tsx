@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Shield, Ban, Search, RefreshCw, X, Check, Loader2, Edit2, Save } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+
+// ✅ 2. 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // === 1. Type Definitions ===
 interface User {
@@ -56,13 +60,24 @@ export default function SystemUsersPage() {
   const [editingPhoneId, setEditingPhoneId] = useState<number | null>(null);
   const [editingPhoneValue, setEditingPhoneValue] = useState("");
 
+  const router = useRouter(); // ✅ 3. 初始化 router
+
+  // ✅ 统一的 401 处理函数
+  const handleUnauthorized = () => {
+    console.warn("Unauthorized. Token is missing or expired. Redirecting to login...");
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
+
   // === 2. Data Fetching ===
   const fetchRoles = async () => {
     try {
-      // Assuming GET /api/Role gets the role list for the dropdowns
-      const res = await fetch('/api/Role', {
+      const res = await fetch(`${API_BASE}/api/Role`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      if (res.status === 401) return handleUnauthorized();
+      
       const result = await res.json();
       setRoles(result.data || result.rows || result || []);
     } catch (error) {
@@ -73,7 +88,7 @@ export default function SystemUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/Account/search', {
+      const res = await fetch(`${API_BASE}/api/Account/search`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -87,7 +102,10 @@ export default function SystemUsersPage() {
           RoleTid: filterRoleId === 0 ? undefined : filterRoleId
         })
       });
+      
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Fetch users failed");
+      
       const result = await res.json();
       
       setUsers(result.rows || result.data || []);
@@ -103,11 +121,13 @@ export default function SystemUsersPage() {
   // Initial Load
   useEffect(() => {
     fetchRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reload data when pagination changes
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
 
   // === 3. Button Actions ===
@@ -119,7 +139,7 @@ export default function SystemUsersPage() {
     
     setSaving(true);
     try {
-      const res = await fetch('/api/Account', {
+      const res = await fetch(`${API_BASE}/api/Account`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -132,6 +152,8 @@ export default function SystemUsersPage() {
           RoleTid: Number(addFormData.roleTid)
         })
       });
+      
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Add user failed");
       
       setIsAddModalOpen(false);
@@ -163,7 +185,7 @@ export default function SystemUsersPage() {
 
     setSaving(true);
     try {
-      const res = await fetch('/api/Account/roles', {
+      const res = await fetch(`${API_BASE}/api/Account/roles`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -174,6 +196,8 @@ export default function SystemUsersPage() {
           RoleTid: Number(assignRoleTid)
         })
       });
+      
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Assign role failed");
       
       setIsRoleModalOpen(false);
@@ -195,10 +219,13 @@ export default function SystemUsersPage() {
     if (!confirm(`Are you sure you want to disable user [${targetUser?.userName}]?`)) return;
 
     try {
-      const res = await fetch(`/api/Account/${selectedUserId}`, {
+      const res = await fetch(`${API_BASE}/api/Account/${selectedUserId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      if (res.status === 401) return handleUnauthorized();
+      
       if (res.ok) {
         fetchUsers();
       } else {
@@ -216,7 +243,7 @@ export default function SystemUsersPage() {
     }
 
     try {
-      const res = await fetch('/api/Account/field', {
+      const res = await fetch(`${API_BASE}/api/Account/field`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -229,6 +256,7 @@ export default function SystemUsersPage() {
         })
       });
       
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Update field failed");
       
       setEditingPhoneId(null);

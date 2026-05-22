@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Search, RefreshCw, X, Check, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+
+// ✅ 2. 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // === 1. Type Definitions ===
 interface UserProjectRow {
@@ -45,12 +49,24 @@ export default function UserProjectListPage() {
   const [formData, setFormData] = useState({ eid: '' });
   const [selectedProjectNos, setSelectedProjectNos] = useState<Set<string>>(new Set());
 
+  const router = useRouter(); // ✅ 3. 初始化 router
+
+  // ✅ 统一的 401 处理函数
+  const handleUnauthorized = () => {
+    console.warn("Unauthorized. Token is missing or expired. Redirecting to login...");
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
+
   // === 2. Data Fetching ===
   const fetchProjects = async () => {
     try {
-      const res = await fetch('/api/Account/projects', {
+      const res = await fetch(`${API_BASE}/api/Account/projects`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      if (res.status === 401) return handleUnauthorized();
+      
       const result = await res.json();
       setAvailableProjects(result.rows || result.data || result || []);
     } catch (error) {
@@ -61,7 +77,7 @@ export default function UserProjectListPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/Account/projects/search', {
+      const res = await fetch(`${API_BASE}/api/Account/projects/search`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -75,7 +91,10 @@ export default function UserProjectListPage() {
           ProjectNo: searchProjectNo.trim()
         })
       });
+      
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Fetch data failed");
+      
       const result = await res.json();
       
       setData(result.rows || result.data || []);
@@ -91,11 +110,13 @@ export default function UserProjectListPage() {
   // Initial Load
   useEffect(() => {
     fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reload data when pagination changes
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
 
   // === 3. Modal Actions ===
@@ -148,7 +169,7 @@ export default function UserProjectListPage() {
     try {
       const projectNoString = Array.from(selectedProjectNos).join(',');
 
-      const res = await fetch('/api/Account/projects/sync', {
+      const res = await fetch(`${API_BASE}/api/Account/projects/sync`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -159,6 +180,8 @@ export default function UserProjectListPage() {
           ProjectNo: projectNoString
         })
       });
+      
+      if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Save failed");
       
       setIsModalOpen(false);
@@ -335,7 +358,7 @@ export default function UserProjectListPage() {
                 />
               </div>
 
-              {/* Multiple Project Selector (Replacing Select2) */}
+              {/* Multiple Project Selector */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1 flex justify-between">
                   <span>Project List</span>

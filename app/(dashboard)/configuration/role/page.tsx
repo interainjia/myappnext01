@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Copy, Trash2, Search, RefreshCw, X, Check, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+
+// ✅ 2. 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // === 1. Type Definitions ===
 interface Role {
@@ -40,6 +44,15 @@ export default function RoleManagementPage() {
   const [checkedNodeIds, setCheckedNodeIds] = useState<Set<number | string>>(new Set());
   const [treeLoading, setTreeLoading] = useState(false);
 
+  const router = useRouter(); // ✅ 3. 初始化 router
+
+  // 统一的 401 处理函数 (让代码更简洁)
+  const handleUnauthorized = () => {
+    console.warn("Unauthorized. Token is missing or expired. Redirecting to login...");
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
+
   // === 2. Data Fetching ===
   const fetchRoles = async () => {
     setLoading(true);
@@ -48,12 +61,17 @@ export default function RoleManagementPage() {
       if (searchName) query.append("roleName", searchName);
       if (searchCreator) query.append("createUser", searchCreator);
       
-      const res = await fetch(`/api/Role?${query.toString()}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      const token = localStorage.getItem('token');
+      // ✅ 4. 使用 API_BASE 拼接绝对路径
+      const res = await fetch(`${API_BASE}/api/Role?${query.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error("Fetch roles failed");
-      const result = await res.json();
       
+      // ✅ 5. 拦截 401
+      if (res.status === 401) return handleUnauthorized();
+      if (!res.ok) throw new Error("Fetch roles failed");
+      
+      const result = await res.json();
       const data = result.data || result.rows || result || [];
       setRoles(Array.isArray(data) ? data : []);
       setSelectedRoleId(null); 
@@ -67,14 +85,18 @@ export default function RoleManagementPage() {
 
   useEffect(() => {
     fetchRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch full permission tree
   const fetchPermissionTree = async () => {
     try {
-      const res = await fetch('/api/Role/actions', {
+      const res = await fetch(`${API_BASE}/api/Role/actions`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      if (res.status === 401) return handleUnauthorized();
+      
       const result = await res.json();
       const treeData = result.data || result;
       setPermissionTree(Array.isArray(treeData) ? treeData : []);
@@ -88,9 +110,12 @@ export default function RoleManagementPage() {
   const fetchRolePermissions = async (roleId: number | string) => {
     setTreeLoading(true);
     try {
-      const res = await fetch(`/api/Role/role-actions?roleId=${roleId}`, {
+      const res = await fetch(`${API_BASE}/api/Role/role-actions?roleId=${roleId}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      if (res.status === 401) return handleUnauthorized();
+      
       const result = await res.json();
       const selectedIds = result.data || result || [];
       setCheckedNodeIds(new Set(Array.isArray(selectedIds) ? selectedIds : []));
@@ -145,10 +170,13 @@ export default function RoleManagementPage() {
     if (!confirm("Are you sure you want to delete this role?")) return;
 
     try {
-      const res = await fetch(`/api/Role/${selectedRoleId}`, {
+      const res = await fetch(`${API_BASE}/api/Role/${selectedRoleId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      if (res.status === 401) return handleUnauthorized();
+      
       if (res.ok) {
         fetchRoles();
       } else {
@@ -167,12 +195,14 @@ export default function RoleManagementPage() {
 
     setSaving(true);
     try {
+      const token = localStorage.getItem('token');
+      
       // 1. Save basic role info
-      const roleRes = await fetch('/api/Role', {
+      const roleRes = await fetch(`${API_BASE}/api/Role`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
           tid: formData.tid,
@@ -181,22 +211,26 @@ export default function RoleManagementPage() {
         })
       });
       
+      if (roleRes.status === 401) return handleUnauthorized();
       if (!roleRes.ok) throw new Error("Save role failed");
+      
       const roleResult = await roleRes.json();
       const newRoleId = formData.tid || roleResult.data?.tid || roleResult.tid; // Adjust based on API
 
       // 2. Save role permission mapping
-      await fetch('/api/Role/actions-mapping', {
+      const mappingRes = await fetch(`${API_BASE}/api/Role/actions-mapping`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
           roleId: newRoleId,
           actionIds: Array.from(checkedNodeIds)
         })
       });
+
+      if (mappingRes.status === 401) return handleUnauthorized();
 
       setIsModalOpen(false);
       fetchRoles();
@@ -391,7 +425,7 @@ export default function RoleManagementPage() {
   );
 }
 
-// === 5. Recursive Tree Multi-select Component (Replacing zTree) ===
+// === 5. Recursive Tree Multi-select Component ===
 function TreeNode({ 
   node, 
   level = 0, 

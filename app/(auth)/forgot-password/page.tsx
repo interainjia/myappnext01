@@ -5,6 +5,9 @@ import { useForm, FieldValues } from "react-hook-form";
 import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+// ✅ 引入环境变量指向真实后端 API 地址
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -21,8 +24,8 @@ export default function ForgotPasswordPage() {
     setError(null);
 
     try {
-      // 对应 SKILL.md 中的发送邮件接口
-      const response = await fetch('/api/Account/send-mail', {
+      // ✅ 加上 API_BASE 绝对路径前缀
+      const response = await fetch(`${API_BASE}/api/Account/send-mail`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: values.email }),
@@ -36,7 +39,8 @@ export default function ForgotPasswordPage() {
         setError(data.message || 'Operation failed. Please try again.');
       }
     } catch {
-      setError('Network error. Please try again later.');
+      // ✅ 提示 CORS 风险
+      setError('Network error. Please make sure the server is running and CORS is enabled.');
     } finally {
       setIsLoading(false);
     }
