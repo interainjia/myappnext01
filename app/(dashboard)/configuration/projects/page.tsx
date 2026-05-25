@@ -220,7 +220,7 @@ export default function UserProjectListPage() {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchData()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
@@ -231,7 +231,7 @@ export default function UserProjectListPage() {
               value={searchEid}
               onChange={(e) => setSearchEid(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchData()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
@@ -242,7 +242,7 @@ export default function UserProjectListPage() {
               value={searchProjectNo}
               onChange={(e) => setSearchProjectNo(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchData()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
@@ -291,7 +291,7 @@ export default function UserProjectListPage() {
                     <td className="px-6 py-4 text-sm text-slate-600 whitespace-normal break-words max-w-xl leading-relaxed">
                       {row.projectNo ? (
                         row.projectNo.split(',').map((proj, idx) => (
-                          <span key={idx} className="inline-block bg-slate-100 text-slate-700 border border-slate-200 rounded px-2 py-0.5 text-xs mr-1.5 mb-1.5">
+                          <span key={idx} className="inline-block bg-slate-100 border border-slate-200 text-slate-900 placeholder-slate-500 rounded px-2 py-0.5 text-xs mr-1.5 mb-1.5">
                             {proj.trim()}
                           </span>
                         ))
@@ -311,21 +311,21 @@ export default function UserProjectListPage() {
             <select 
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPageIndex(1); }}
-              className="px-2 py-1 border border-slate-200 rounded text-sm bg-white"
+              className="px-2 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white"
             >
               {[10, 25, 50, 75, 100].map(size => <option key={size} value={size}>{size} per page</option>)}
             </select>
             <button 
               disabled={pageIndex === 1} 
               onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-              className="px-3 py-1 border border-slate-200 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
             >
               Previous
             </button>
             <button 
               disabled={data.length < pageSize} 
               onClick={() => setPageIndex(p => p + 1)}
-              className="px-3 py-1 border border-slate-200 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
             >
               Next
             </button>
@@ -353,7 +353,7 @@ export default function UserProjectListPage() {
                   value={formData.eid} 
                   onChange={(e) => setFormData({...formData, eid: e.target.value})}
                   disabled={modalMode === 'edit'}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
                   placeholder="Please input Account ID"
                 />
               </div>
@@ -365,7 +365,7 @@ export default function UserProjectListPage() {
                   <span className="text-xs text-blue-500 font-normal">{selectedProjectNos.size} selected</span>
                 </label>
                 
-                <div className="border border-slate-200 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
+                <div className="border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
                   {availableProjects.length === 0 ? (
                     <div className="p-4 text-center text-sm text-slate-500">No projects available</div>
                   ) : (
@@ -392,7 +392,7 @@ export default function UserProjectListPage() {
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 text-slate-600 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors">
                 Close
               </button>
               <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">

@@ -271,7 +271,7 @@ export default function RoleManagementPage() {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchRoles()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
@@ -282,11 +282,11 @@ export default function RoleManagementPage() {
               value={searchCreator}
               onChange={(e) => setSearchCreator(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchRoles()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
-          <button onClick={fetchRoles} className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" title="Refresh">
+          <button onClick={fetchRoles} className="p-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors" title="Refresh">
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
@@ -359,7 +359,7 @@ export default function RoleManagementPage() {
                   type="text" 
                   value={formData.roleName} 
                   onChange={(e) => setFormData({...formData, roleName: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                   placeholder="Enter unique role name"
                 />
               </div>
@@ -369,14 +369,14 @@ export default function RoleManagementPage() {
                   type="text" 
                   value={formData.description} 
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                   placeholder="Enter role description"
                 />
               </div>
 
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <label className="text-sm font-semibold text-slate-700">Select Menu and Action Permissions:</label>
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg max-h-64 overflow-y-auto">
+                <div className="p-4 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg max-h-64 overflow-y-auto">
                   {treeLoading ? (
                     <div className="flex justify-center py-8"><Loader2 className="animate-spin text-blue-500" /></div>
                   ) : (
@@ -404,7 +404,7 @@ export default function RoleManagementPage() {
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Close
               </button>

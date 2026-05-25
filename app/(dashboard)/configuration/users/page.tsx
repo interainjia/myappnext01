@@ -297,12 +297,14 @@ export default function SystemUsersPage() {
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative">
             <input 
-              type="text" 
+              type="text"
+              name="search_dummy_name"
+              autoComplete="off"
               placeholder="User Name" 
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
@@ -313,12 +315,12 @@ export default function SystemUsersPage() {
               value={searchEid}
               onChange={(e) => setSearchEid(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
           <select 
-            className="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={filterRoleId}
             onChange={(e) => { setFilterRoleId(Number(e.target.value)); }}
           >
@@ -327,7 +329,7 @@ export default function SystemUsersPage() {
               <option key={r.tid} value={r.tid}>{r.roleName}</option>
             ))}
           </select>
-          <button onClick={fetchUsers} className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" title="Refresh">
+          <button onClick={fetchUsers} className="p-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors" title="Refresh">
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
@@ -404,7 +406,7 @@ export default function SystemUsersPage() {
                     <td className="px-6 py-4 text-sm text-slate-500">{user.loginIp || '-'}</td>
                     <td className="px-6 py-4 text-sm text-slate-500">{user.lastLoginTime || '-'}</td>
                     <td className="px-6 py-4 text-sm text-slate-700" title={user.roleDesc}>
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium border border-slate-200">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium border border-slate-200 text-slate-900 placeholder-slate-500">
                         {user.roleName || '-'}
                       </span>
                     </td>
@@ -426,14 +428,14 @@ export default function SystemUsersPage() {
             <button 
               disabled={pageIndex === 1} 
               onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-              className="px-3 py-1 border border-slate-200 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
             >
               Previous
             </button>
             <button 
               disabled={users.length < pageSize} 
               onClick={() => setPageIndex(p => p + 1)}
-              className="px-3 py-1 border border-slate-200 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
             >
               Next
             </button>
@@ -454,7 +456,7 @@ export default function SystemUsersPage() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Login Name (English)</label>
                 <input 
                   type="text" value={addFormData.eid} onChange={(e) => setAddFormData({...addFormData, eid: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="Enter login name"
                 />
               </div>
@@ -462,7 +464,7 @@ export default function SystemUsersPage() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Name</label>
                 <input 
                   type="text" value={addFormData.userName} onChange={(e) => setAddFormData({...addFormData, userName: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="Enter user name"
                 />
               </div>
@@ -470,7 +472,7 @@ export default function SystemUsersPage() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
                 <input 
                   type="password" value={addFormData.pwd} onChange={(e) => setAddFormData({...addFormData, pwd: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="Enter password"
                 />
               </div>
@@ -478,7 +480,7 @@ export default function SystemUsersPage() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Role</label>
                 <select 
                   value={addFormData.roleTid} onChange={(e) => setAddFormData({...addFormData, roleTid: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
                 >
                   <option value="">Select a role...</option>
                   {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
@@ -507,14 +509,14 @@ export default function SystemUsersPage() {
               <label className="block text-sm font-semibold text-slate-700 mb-2">Select Role for User</label>
               <select 
                 value={assignRoleTid} onChange={(e) => setAssignRoleTid(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+                className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
               >
                 <option value="">Please select...</option>
                 {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
               </select>
             </div>
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsRoleModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">Close</button>
+              <button onClick={() => setIsRoleModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 placeholder-slate-500 rounded-lg hover:bg-slate-50">Close</button>
               <button onClick={handleAssignRole} disabled={saving} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Submit
               </button>

@@ -238,7 +238,7 @@ export default function MyProfilePage() {
                   type="password" 
                   value={passwordData.oldPwd} 
                   onChange={(e) => setPasswordData({...passwordData, oldPwd: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                   placeholder="Enter current password"
                 />
               </div>
@@ -249,7 +249,7 @@ export default function MyProfilePage() {
                   type="password" 
                   value={passwordData.pwd} 
                   onChange={(e) => setPasswordData({...passwordData, pwd: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                   placeholder="Enter new password"
                 />
               </div>
@@ -260,7 +260,7 @@ export default function MyProfilePage() {
                   type="password" 
                   value={passwordData.pwd2} 
                   onChange={(e) => setPasswordData({...passwordData, pwd2: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                   placeholder="Re-enter new password"
                 />
               </div>
