@@ -22,8 +22,8 @@
    - 接口: `POST /api/Account/logon` (LogOnVM) 或 `POST /api/Account`
    - 功能: 提供用户注册和新账号创建。
 3. **Forgot Password**: 
-   - 接口: `POST /api/Account/send-mail` (发送验证码/链接)
-   - 接口: `PUT /api/Account/reset` (重置密码)
+   - 接口: `POST /api/Account/send-mail-create-account` (发送验证码/链接)
+   - 接口: `PUT /api/Account/send-mail-forgot-password` (重置密码)
 
 ### B. 应用流 (App Group)
 1. **Home Page**: 

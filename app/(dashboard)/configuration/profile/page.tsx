@@ -181,7 +181,7 @@ export default function MyProfilePage() {
                   type="text" 
                   value={profileData.eid} 
                   disabled
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed focus:outline-none"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed focus:outline-none"
                 />
                 <p className="text-xs text-slate-400 mt-1">Your unique login identifier cannot be changed.</p>
               </div>
@@ -192,7 +192,7 @@ export default function MyProfilePage() {
                   type="text" 
                   value={profileData.userName} 
                   onChange={(e) => setProfileData({...profileData, userName: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                   placeholder="Enter your name"
                 />
               </div>
@@ -203,7 +203,7 @@ export default function MyProfilePage() {
                   type="tel" 
                   value={profileData.phone} 
                   onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                   placeholder="Enter your contact number"
                 />
               </div>
@@ -241,6 +241,7 @@ export default function MyProfilePage() {
                   className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                   placeholder="Enter current password"
                 />
+                <p className="text-xs text-slate-400 mt-1">Input your current password.</p>
               </div>
 
               <div>

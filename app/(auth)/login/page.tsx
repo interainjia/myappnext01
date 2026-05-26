@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { jwtDecode } from "jwt-decode"; // 1. 引入解析库
+import { jwtDecode } from "jwt-decode";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -37,26 +37,20 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        // 1. 存储真实的 Token
         localStorage.setItem('token', data.token);
         
-        // 2. 存储 Refresh Token
         if (data.refresh_Token || data.refreshToken) {
             localStorage.setItem('refreshToken', data.refresh_Token || data.refreshToken);
         }
         
-        // 3. 解码 Token 并提取角色 (核心修改)
         try {
           const decoded = jwtDecode(data.token) as any;
-          // 优先取 UserRole，备选用全称 schema
           const role = decoded.UserRole || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
           
           if (role) {
-            // 因为你的 getAccess 函数接收的是数组 string[]，所以要用数组包起来
             const rolesArray = Array.isArray(role) ? role : [role];
             localStorage.setItem('userRoles', JSON.stringify(rolesArray));
           } else {
-             // 如果没找到角色，存空数组
             localStorage.setItem('userRoles', JSON.stringify([]));
           }
         } catch (decodeErr) {
@@ -64,10 +58,8 @@ export default function LoginPage() {
           localStorage.setItem('userRoles', JSON.stringify([]));
         }
         
-        // 4. 存储用户名
         localStorage.setItem('userName', values.username); 
 
-        // 5. 重定向
         const urlParams = new URL(window.location.href).searchParams;
         const redirectUrl = urlParams.get('redirect') || '/dashboard';
         window.location.href = redirectUrl;
@@ -121,7 +113,7 @@ export default function LoginPage() {
         </div>
 
         <div className="text-right mt-4">
-          <Link href="/user/forgot-password" className="text-[#7a94ff] text-[15px] hover:underline">
+          <Link href="/forgot-password" className="text-[#7a94ff] text-[15px] hover:underline">
             Forgot password?
           </Link>
         </div>

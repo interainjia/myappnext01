@@ -423,22 +423,42 @@ export default function SystemUsersPage() {
         
         {/* Basic Pagination Controls */}
         <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-          <span className="text-sm text-slate-500">Total {total} users</span>
-          <div className="flex gap-2">
-            <button 
-              disabled={pageIndex === 1} 
-              onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+          <span className="text-sm text-slate-500">Total {total} records</span>
+          
+          <div className="flex items-center gap-4">
+            {/* Page Size Selector */}
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPageIndex(1); // Reset to first page when changing page size
+              }}
+              className="px-3 py-1.5 border border-slate-200 text-slate-900 rounded text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
             >
-              Previous
-            </button>
-            <button 
-              disabled={users.length < pageSize} 
-              onClick={() => setPageIndex(p => p + 1)}
-              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
-            >
-              Next
-            </button>
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={75}>75 per page</option>
+              <option value={100}>100 per page</option>
+            </select>
+
+            {/* Pagination Buttons */}
+            <div className="flex gap-2">
+              <button 
+                disabled={pageIndex === 1} 
+                onClick={() => setPageIndex(p => Math.max(1, p - 1))}
+                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+              >
+                Previous
+              </button>
+              <button 
+                disabled={pageIndex * pageSize >= total} 
+                onClick={() => setPageIndex(p => p + 1)}
+                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>

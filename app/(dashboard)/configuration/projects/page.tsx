@@ -2,17 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Search, RefreshCw, X, Check, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+import { useRouter } from 'next/navigation';
 
-// ✅ 2. 引入环境变量指向真实后端 API 地址
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // === 1. Type Definitions ===
 interface UserProjectRow {
-  tid: number;
+  tid?: number; // 设置为可选，防止后端未返回
   eid: string;
   userName: string;
-  projectNo: string; // Comma-separated string of projects from the backend
+  projectNo: string;
 }
 
 interface Project {
@@ -22,11 +21,12 @@ interface Project {
 
 export default function UserProjectListPage() {
   // === State Management ===
-  // Table Data
   const [data, setData] = useState<UserProjectRow[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  
+  // ✅ 修复 1：使用唯一的 eid 作为选中标识，而不是可能为空的 tid
+  const [selectedEid, setSelectedEid] = useState<string | null>(null);
   
   // Pagination
   const [pageIndex, setPageIndex] = useState(1);
@@ -49,16 +49,14 @@ export default function UserProjectListPage() {
   const [formData, setFormData] = useState({ eid: '' });
   const [selectedProjectNos, setSelectedProjectNos] = useState<Set<string>>(new Set());
 
-  const router = useRouter(); // ✅ 3. 初始化 router
+  const router = useRouter();
 
-  // ✅ 统一的 401 处理函数
   const handleUnauthorized = () => {
-    console.warn("Unauthorized. Token is missing or expired. Redirecting to login...");
+    console.warn("Unauthorized. Redirecting to login...");
     localStorage.removeItem('token');
     router.push('/login');
   };
 
-  // === 2. Data Fetching ===
   const fetchProjects = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/Account/projects`, {
@@ -98,8 +96,8 @@ export default function UserProjectListPage() {
       const result = await res.json();
       
       setData(result.rows || result.data || []);
-      setTotal(result.total || 0);
-      setSelectedRowId(null); // Clear selection on refresh
+      setTotal(result.total || result.totalCount || 0);
+      setSelectedEid(null); // 刷新后清除选中状态
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
@@ -107,21 +105,27 @@ export default function UserProjectListPage() {
     }
   };
 
-  // Initial Load
   useEffect(() => {
     fetchProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reload data when pagination changes
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
 
-  // === 3. Modal Actions ===
+  // ✅ 修复 2：统一搜索触发器，确保搜索时页码回到第一页
+  const handleSearchTrigger = () => {
+    if (pageIndex !== 1) {
+      setPageIndex(1);
+    } else {
+      fetchData();
+    }
+  };
+
   const handleOpenModal = (mode: 'add' | 'edit') => {
-    if (mode === 'edit' && !selectedRowId) {
+    if (mode === 'edit' && !selectedEid) {
       alert("Please select a user first!");
       return;
     }
@@ -132,10 +136,9 @@ export default function UserProjectListPage() {
       setFormData({ eid: '' });
       setSelectedProjectNos(new Set());
     } else {
-      const targetRow = data.find(r => r.tid === selectedRowId);
+      const targetRow = data.find(r => r.eid === selectedEid);
       if (targetRow) {
         setFormData({ eid: targetRow.eid });
-        // Split comma-separated ProjectNo string into an array and map to Set
         const projectArray = (targetRow.projectNo || '').split(',').map(p => p.trim()).filter(Boolean);
         setSelectedProjectNos(new Set(projectArray));
       }
@@ -194,7 +197,6 @@ export default function UserProjectListPage() {
     }
   };
 
-  // === 4. UI Rendering ===
   return (
     <div className="max-w-[1200px] mx-auto space-y-6">
       
@@ -219,7 +221,7 @@ export default function UserProjectListPage() {
               placeholder="User Name" 
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchData()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()}
               className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
@@ -230,7 +232,7 @@ export default function UserProjectListPage() {
               placeholder="Account ID" 
               value={searchEid}
               onChange={(e) => setSearchEid(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchData()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()}
               className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
@@ -241,13 +243,13 @@ export default function UserProjectListPage() {
               placeholder="Project No." 
               value={searchProjectNo}
               onChange={(e) => setSearchProjectNo(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchData()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()}
               className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
           </div>
           
-          <button onClick={fetchData} className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium">
+          <button onClick={handleSearchTrigger} className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium">
             Search
           </button>
         </div>
@@ -273,16 +275,16 @@ export default function UserProjectListPage() {
               ) : (
                 data.map(row => (
                   <tr 
-                    key={row.tid} 
-                    onClick={() => setSelectedRowId(row.tid)}
-                    className={`border-b border-slate-50 cursor-pointer transition-colors ${selectedRowId === row.tid ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}
+                    key={row.eid} 
+                    onClick={() => setSelectedEid(row.eid)}
+                    className={`border-b border-slate-50 cursor-pointer transition-colors ${selectedEid === row.eid ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}
                   >
                     <td className="px-6 py-4 text-center">
                       <input 
                         type="radio" 
                         name="rowSelection"
-                        checked={selectedRowId === row.tid} 
-                        onChange={() => setSelectedRowId(row.tid)}
+                        checked={selectedEid === row.eid} 
+                        onChange={() => setSelectedEid(row.eid)}
                         className="w-4 h-4 text-blue-600 cursor-pointer"
                       />
                     </td>
@@ -291,7 +293,7 @@ export default function UserProjectListPage() {
                     <td className="px-6 py-4 text-sm text-slate-600 whitespace-normal break-words max-w-xl leading-relaxed">
                       {row.projectNo ? (
                         row.projectNo.split(',').map((proj, idx) => (
-                          <span key={idx} className="inline-block bg-slate-100 border border-slate-200 text-slate-900 placeholder-slate-500 rounded px-2 py-0.5 text-xs mr-1.5 mb-1.5">
+                          <span key={idx} className="inline-block bg-slate-100 border border-slate-200 text-slate-900 rounded px-2 py-0.5 text-xs mr-1.5 mb-1.5">
                             {proj.trim()}
                           </span>
                         ))
@@ -311,21 +313,21 @@ export default function UserProjectListPage() {
             <select 
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPageIndex(1); }}
-              className="px-2 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white"
+              className="px-2 py-1 border border-slate-200 text-slate-900 rounded text-sm bg-white"
             >
               {[10, 25, 50, 75, 100].map(size => <option key={size} value={size}>{size} per page</option>)}
             </select>
             <button 
               disabled={pageIndex === 1} 
               onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 text-slate-900 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
             >
               Previous
             </button>
             <button 
-              disabled={data.length < pageSize} 
+              disabled={pageIndex * pageSize >= total} 
               onClick={() => setPageIndex(p => p + 1)}
-              className="px-3 py-1 border border-slate-200 text-slate-900 placeholder-slate-500 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 text-slate-900 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
             >
               Next
             </button>
@@ -365,7 +367,7 @@ export default function UserProjectListPage() {
                   <span className="text-xs text-blue-500 font-normal">{selectedProjectNos.size} selected</span>
                 </label>
                 
-                <div className="border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
+                <div className="border border-slate-200 text-slate-900 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
                   {availableProjects.length === 0 ? (
                     <div className="p-4 text-center text-sm text-slate-500">No projects available</div>
                   ) : (
@@ -392,7 +394,7 @@ export default function UserProjectListPage() {
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 text-slate-600 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">
                 Close
               </button>
               <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
