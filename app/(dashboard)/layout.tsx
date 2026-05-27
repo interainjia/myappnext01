@@ -8,6 +8,8 @@ import { usePathname } from 'next/navigation';
 import { LogOut, ChevronDown, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
@@ -57,9 +59,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [mounted, pathname]);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      // 1. 尝试通知后端清理 Cookie (使用相对路径 /api/ 配合 Nginx 转发)
+      // 注意：这里建议去掉 API_BASE，直接用 /api/ 这种相对路径，最稳妥
+      await fetch(`/api/Account/logout`, {
+        method: 'POST',
+        credentials: 'include', 
+      });
+    } catch (e) {
+      console.error("Logout API call failed, but proceeding with local cleanup.");
+    } finally {
+      // 2. 无论接口是否报错，必须清空本地状态并跳转
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // 3. 彻底跳转到登录页，并带上标记防止 SSO 自动检测逻辑再次循环
+      window.location.replace('/login?loggedOut=true');
+    }
   };
 
   const filteredMenus = MENU_ITEMS.filter(item => {
