@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useForm, FieldValues } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
+import { setAuthCookie } from "@/lib/auth";
+import { fetchWithTimeout, RequestTimeoutError } from "@/lib/fetch";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -33,10 +35,12 @@ export default function LoginPage() {
     const checkSsoLogin = async () => {
       try {
         // 🚨 极其关键：必须配置 credentials: 'include'，浏览器才会携带跨域 Cookie 请求后端
-        const response = await fetch(`${API_BASE}/api/Account/sso-exchange`, {
+        // 超时 8 秒：SSO 检测是非阻塞的，不应让用户等太久
+        const response = await fetchWithTimeout(`${API_BASE}/api/Account/sso-exchange`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', 
+          credentials: 'include',
+          timeout: 8_000,
         });
 
         if (response.ok) {
@@ -48,7 +52,11 @@ export default function LoginPage() {
           }
         }
       } catch (err) {
-        console.log("SSO check failed or no active session found.", err);
+        if (err instanceof RequestTimeoutError) {
+          console.log("SSO check timed out, falling back to manual login.");
+        } else {
+          console.log("SSO check failed or no active session found.", err);
+        }
       } finally {
         // 无论成功失败，关闭骨架屏检测状态，展示正常登录 UI
         setIsCheckingSso(false);
@@ -64,28 +72,36 @@ export default function LoginPage() {
     if (refreshToken) {
       localStorage.setItem('refreshToken', refreshToken);
     }
-    
+
     try {
       const decoded = jwtDecode(token) as any;
       const role = decoded.UserRole || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      
+
       if (role) {
         const rolesArray = Array.isArray(role) ? role : [role];
         localStorage.setItem('userRoles', JSON.stringify(rolesArray));
       } else {
         localStorage.setItem('userRoles', JSON.stringify([]));
       }
-      
+
       // 存储用户名
       localStorage.setItem('userName', decoded.UserName || decoded.name || 'User');
     } catch (e) {
       localStorage.setItem('userRoles', JSON.stringify([]));
     }
 
+    // 🍪 同步写入 auth-session cookie，供 middleware.ts 检查路由权限
+    setAuthCookie(token);
+
     // 重定向到主页
+    // 🔒 安全校验：只允许以 / 开头的相对路径，防止开放重定向攻击
+    // 攻击者可能构造 ?redirect=https://evil.com 诱导用户跳转到恶意网站
     const urlParams = new URL(window.location.href).searchParams;
-    const redirectUrl = urlParams.get('redirect') || '/dashboard';
-    // 使用 replace 可以防止用户在 dashboard 按“后退”键又回到登录页
+    const rawRedirect = urlParams.get('redirect') || '';
+    const redirectUrl = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+      ? rawRedirect
+      : '/dashboard';
+    // 使用 replace 可以防止用户在 dashboard 按"后退"键又回到登录页
     window.location.replace(redirectUrl);
   };
 
@@ -95,15 +111,13 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // 👇 1. 把路由改成 /api/Account/login 
-      const response = await fetch(`${API_BASE}/api/Account/login`, {
+      // 带 15 秒超时的密码登录请求
+      const response = await fetchWithTimeout(`${API_BASE}/api/Account/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // 👇 2. 这里的字段名需要与后端 LoginRequestDto 保持一致
-        // 根据项目上下文，C# 后端通常使用 PascalCase (UserName, Password)
         body: JSON.stringify({
-          user: values.username, 
-          passwd: values.password
+          user: values.username,
+          passwd: values.password,
         }),
       });
 
@@ -138,7 +152,11 @@ export default function LoginPage() {
         }
       }
     } catch (err) {
-      setError('Network error. Please make sure the backend server is running.');
+      if (err instanceof RequestTimeoutError) {
+        setError('Request timed out. Please check your network and try again.');
+      } else {
+        setError('Network error. Please make sure the backend server is running.');
+      }
     } finally {
       setIsLoading(false);
     }

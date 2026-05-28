@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Shield, Ban, Search, RefreshCw, X, Check, Loader2, Edit2, Save } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+import { useRouter } from 'next/navigation';
+import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
 // ✅ 2. 引入环境变量指向真实后端 API 地址
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -133,7 +134,7 @@ export default function SystemUsersPage() {
   // === 3. Button Actions ===
   const handleAddUser = async () => {
     if (!addFormData.eid || !addFormData.userName || !addFormData.pwd || !addFormData.roleTid) {
-      alert("Please fill in all required fields!");
+      toastWarning("Please fill in all required fields!");
       return;
     }
     
@@ -155,13 +156,14 @@ export default function SystemUsersPage() {
       
       if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Add user failed");
-      
+
       setIsAddModalOpen(false);
       setAddFormData({ eid: '', userName: '', pwd: '', roleTid: '' });
+      toastSuccess("User added successfully!");
       fetchUsers();
     } catch (error) {
       console.error("Add user error:", error);
-      alert("Failed to add user.");
+      toastError("Failed to add user.");
     } finally {
       setSaving(false);
     }
@@ -169,7 +171,7 @@ export default function SystemUsersPage() {
 
   const handleOpenAssignRoleModal = () => {
     if (!selectedUserId) {
-      alert("Please select a user first!");
+      toastWarning("Please select a user first!");
       return;
     }
     const user = users.find(u => u.tid === selectedUserId);
@@ -179,7 +181,7 @@ export default function SystemUsersPage() {
 
   const handleAssignRole = async () => {
     if (!assignRoleTid) {
-      alert("Please select a role!");
+      toastWarning("Please select a role!");
       return;
     }
 
@@ -199,12 +201,13 @@ export default function SystemUsersPage() {
       
       if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Assign role failed");
-      
+
       setIsRoleModalOpen(false);
+      toastSuccess("Role assigned successfully!");
       fetchUsers();
     } catch (error) {
       console.error("Assign role error:", error);
-      alert("Failed to assign role.");
+      toastError("Failed to assign role.");
     } finally {
       setSaving(false);
     }
@@ -212,7 +215,7 @@ export default function SystemUsersPage() {
 
   const handleDisableUser = async () => {
     if (!selectedUserId) {
-      alert("Please select a user first!");
+      toastWarning("Please select a user first!");
       return;
     }
     const targetUser = users.find(u => u.tid === selectedUserId);
@@ -227,18 +230,20 @@ export default function SystemUsersPage() {
       if (res.status === 401) return handleUnauthorized();
       
       if (res.ok) {
+        toastSuccess(`User [${targetUser?.userName}] has been disabled.`);
         fetchUsers();
       } else {
-        alert("Disable user failed");
+        toastError("Failed to disable user.");
       }
     } catch (error) {
       console.error("Disable error:", error);
+      toastError("Failed to disable user.");
     }
   };
 
   const handlePhoneEditSave = async (userId: number) => {
     if (!editingPhoneValue.trim()) {
-      alert("Please fill in the mobile number!");
+      toastWarning("Please fill in the mobile number!");
       return;
     }
 
@@ -258,12 +263,13 @@ export default function SystemUsersPage() {
       
       if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Update field failed");
-      
+
       setEditingPhoneId(null);
+      toastSuccess("Mobile number updated.");
       fetchUsers();
     } catch (error) {
       console.error("Update field error:", error);
-      alert("Failed to update mobile number.");
+      toastError("Failed to update mobile number.");
     }
   };
 

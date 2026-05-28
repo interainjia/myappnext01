@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Save, Key, User, Loader2, Check } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+import { useRouter } from 'next/navigation';
+import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
 // ✅ 2. 引入环境变量指向真实后端 API 地址
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -70,7 +71,7 @@ export default function MyProfilePage() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profileData.userName.trim()) {
-      alert("Please enter your name!");
+      toastWarning("Please enter your name!");
       return;
     }
 
@@ -90,11 +91,11 @@ export default function MyProfilePage() {
       
       if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Failed to update profile");
-      
-      alert("Profile updated successfully!");
+
+      toastSuccess("Profile updated successfully!");
     } catch (error) {
       console.error(error);
-      alert("An error occurred while updating the profile.");
+      toastError("An error occurred while updating the profile.");
     } finally {
       setSavingProfile(false);
     }
@@ -104,10 +105,10 @@ export default function MyProfilePage() {
     e.preventDefault();
     
     // Validation
-    if (!passwordData.oldPwd) return alert("Please enter your old password!");
-    if (!passwordData.pwd) return alert("Please enter a new password!");
-    if (!passwordData.pwd2) return alert("Please re-enter the new password!");
-    if (passwordData.pwd !== passwordData.pwd2) return alert("New passwords do not match!");
+    if (!passwordData.oldPwd) { toastWarning("Please enter your old password!"); return; }
+    if (!passwordData.pwd)    { toastWarning("Please enter a new password!");     return; }
+    if (!passwordData.pwd2)   { toastWarning("Please re-enter the new password!"); return; }
+    if (passwordData.pwd !== passwordData.pwd2) { toastWarning("New passwords do not match!"); return; }
 
     setSavingPassword(true);
     try {
@@ -130,16 +131,16 @@ export default function MyProfilePage() {
         throw new Error(errData.message || "Failed to change password");
       }
       
-      alert("Password updated successfully! Please log out and log in again.");
-      setPasswordData({ oldPwd: '', pwd: '', pwd2: '' }); // Clear form
-      
-      // ✅ 密码修改成功后自动清除 Token 并跳转到登录页，强制重新登录
+      toastSuccess("Password updated! Redirecting to login...");
+      setPasswordData({ oldPwd: '', pwd: '', pwd2: '' });
+
+      // 密码修改成功后，清除 Token 并跳转，短暂延迟让 toast 先展示
       localStorage.removeItem('token');
-      router.push('/login');
-      
+      setTimeout(() => router.push('/login'), 1500);
+
     } catch (error: any) {
       console.error(error);
-      alert(error.message || "An error occurred while changing the password.");
+      toastError(error.message || "An error occurred while changing the password.");
     } finally {
       setSavingPassword(false);
     }

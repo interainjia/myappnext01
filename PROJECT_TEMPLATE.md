@@ -16,7 +16,9 @@
 8. [API 对接规范](#api-对接规范)
 9. [组件与页面约定](#组件与页面约定)
 10. [构建与部署](#构建与部署)
-11. [复用该模板的步骤](#复用该模板的步骤)
+11. [P2 稳健性加固](#p2-稳健性加固)
+12. [复用该模板的步骤](#复用该模板的步骤)
+13. [常见问题](#常见问题)
 
 ---
 
@@ -67,8 +69,18 @@ my-app-next-01/
 │           ├── menu/page.tsx       # 菜单管理
 │           └── projects/page.tsx   # 项目配置
 │
+├── middleware.ts                    # 服务端路由保护（next dev 完整生效，静态导出见注释）
+│
 ├── lib/
-│   └── access.ts                   # 权限计算工具函数
+│   ├── access.ts                   # 权限计算工具函数
+│   ├── auth.ts                     # JWT 管理：解码 / 过期检测 / refreshToken 续期 / auth cookie
+│   ├── fetch.ts                    # 带超时的 fetch 封装（AbortController，默认 15s）
+│   └── toast.ts                    # 全局 Toast 触发函数（toastSuccess / toastError 等）
+│
+├── components/
+│   ├── ErrorBoundary.tsx           # 全局 React 错误边界（防白屏崩溃）
+│   └── ui/
+│       └── Toaster.tsx             # Toast 通知容器（监听 CustomEvent，根布局放置一次）
 │
 ├── constants/
 │   └── menus.ts                    # 菜单定义 + 角色访问控制映射
@@ -79,7 +91,7 @@ my-app-next-01/
 ├── .env.local                      # 本地私密变量（git-ignored）
 ├── .env.development                # 开发环境变量
 ├── .env.production                 # 生产环境变量
-├── next.config.ts                  # Next.js 配置（静态导出）
+├── next.config.ts                  # Next.js 配置（静态导出 + middleware 说明注释）
 ├── tsconfig.json                   # TypeScript 配置
 ├── postcss.config.mjs              # PostCSS + Tailwind
 └── package.json
@@ -154,25 +166,70 @@ app/
     └── layout.tsx   → 左侧导航 + 顶部用户栏布局
 ```
 
-### 认证路由守卫
+### 认证路由守卫（双层防护）
 
-`(dashboard)/layout.tsx` 在每次路由加载时检查：
+#### 第一层：middleware.ts（服务端，`next dev` 生效）
+
+在请求抵达页面之前，Edge Runtime 检查 `auth-session` cookie：
 
 ```typescript
-// 检查 token 是否存在
-const token = localStorage.getItem('token');
-if (!token) {
-  router.replace('/login');
-  return;
+// middleware.ts
+import { NextRequest, NextResponse } from 'next/server';
+
+const PROTECTED_PREFIXES = ['/home', '/dashboard', '/projects', '/configuration'];
+const AUTH_ONLY_PATHS    = ['/login', '/signup', '/forgot-password', '/reset-password'];
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isAuthenticated = request.cookies.has('auth-session'); // 登录时由客户端写入
+
+  // 未登录访问受保护路由 → 跳转登录（携带 redirect 参数）
+  if (PROTECTED_PREFIXES.some(p => pathname.startsWith(p)) && !isAuthenticated) {
+    const url = new URL('/login', request.url);
+    url.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // 已登录访问认证页 → 跳转 dashboard
+  if (AUTH_ONLY_PATHS.some(p => pathname === p) && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  return NextResponse.next();
 }
 
-// 检查 token 是否过期
-const payload = JSON.parse(atob(token.split('.')[1]));
-if (payload.exp && Date.now() / 1000 > payload.exp) {
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|img/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+};
+```
+
+> ⚠️ **静态导出限制**：`output: 'export'` 模式下 middleware 不运行。
+> 生产部署需在 Nginx 中添加等效规则（见[Nginx 部署示例](#nginx-部署示例)）。
+
+---
+
+#### 第二层：Dashboard Layout 客户端校验（兜底保护）
+
+`(dashboard)/layout.tsx` 在每次路由切换时调用 `ensureValidToken()`：
+
+```typescript
+// 使用 lib/auth.ts 的统一入口，自动处理过期 + refresh
+const validToken = await ensureValidToken();
+
+if (!validToken) {
+  toastError("Your session has expired, please log in again.");
+  clearAuthCookie();
   localStorage.clear();
-  router.replace('/login');
+  setTimeout(() => { window.location.href = '/login'; }, 1200);
 }
 ```
+
+两层防护的分工：
+
+| 层级 | 技术 | 触发时机 | 静态导出 |
+|------|------|----------|----------|
+| middleware.ts | Edge Runtime + Cookie | HTTP 请求到达时（服务端） | ❌ 不生效 |
+| Dashboard Layout | React useEffect + localStorage | 客户端路由切换后 | ✅ 始终生效 |
 
 ### 菜单定义（constants/menus.ts）
 
@@ -222,17 +279,24 @@ JWT 解码 → 提取 UserRole + UserName → 存入 localStorage
 ### SSO 自动交换（login/page.tsx）
 
 ```typescript
+import { fetchWithTimeout, RequestTimeoutError } from '@/lib/fetch';
+
 async function checkSsoLogin() {
   try {
-    const res = await fetch(`${API_BASE}/api/Account/sso-exchange`, {
+    // 超时 8 秒：SSO 检测是非阻塞的，超时即回退到手动登录表单
+    const res = await fetchWithTimeout(`${API_BASE}/api/Account/sso-exchange`, {
       method: 'POST',
-      credentials: 'include',  // 携带跨域 Cookie
+      credentials: 'include',   // 携带跨域 Cookie
+      timeout: 8_000,
     });
     if (res.ok) {
       const data = await res.json();
       storeTokenAndRedirect(data.token);
     }
-  } catch {
+  } catch (err) {
+    if (err instanceof RequestTimeoutError) {
+      console.log('SSO check timed out, falling back to manual login.');
+    }
     // SSO 失败，显示登录表单
   }
 }
@@ -267,17 +331,73 @@ localStorage.setItem('userRoles', JSON.stringify(userRoles));
 localStorage.setItem('userName', payload.UserName ?? '');
 ```
 
+### auth-session Cookie（middleware 与客户端协作）
+
+middleware.ts 只能读取 Cookie，无法访问 localStorage。因此登录成功后需同步写一个轻量 Cookie：
+
+```typescript
+// lib/auth.ts（已集成，无需手动调用）
+export function setAuthCookie(token: string): void {
+  const payload = decodeToken(token);
+  let cookie = 'auth-session=1; path=/; SameSite=Lax';
+  if (payload?.exp) {
+    cookie += `; expires=${new Date(payload.exp * 1000).toUTCString()}`;
+  }
+  document.cookie = cookie;
+}
+
+export function clearAuthCookie(): void {
+  document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+}
+```
+
+`handleSuccessfulLogin` 在存储 token 后会自动调用 `setAuthCookie()`。  
+`handleLogout` 在清空 localStorage 前会调用 `clearAuthCookie()`。
+
+> Cookie 只是"有/无"标记（值为 `1`），**不携带 JWT 内容**，安全风险极低。
+
+---
+
+### refreshToken 自动续期（lib/auth.ts）
+
+`ensureValidToken()` 是统一的 token 校验入口，供 Dashboard Layout 调用：
+
+```typescript
+import { ensureValidToken } from '@/lib/auth';
+
+// 策略：已过期 → 尝试刷新；即将到期（5min内）→ 后台静默刷新；正常 → 直接返回
+const validToken = await ensureValidToken();
+if (!validToken) {
+  // refreshToken 也失效，需重新登录
+}
+```
+
+刷新接口约定（后端实现）：
+
+```
+POST /api/Account/refresh
+Body: { "refreshToken": "..." }
+Response: { "token": "...", "refresh_Token": "..." }
+```
+
+`refreshToken` 在登录成功时由后端一并返回，存储于 `localStorage.refreshToken`。
+
+---
+
 ### 登出流程
 
 ```typescript
+import { clearAuthCookie } from '@/lib/auth';
+
 async function handleLogout() {
-  await fetch(`${API_BASE}/api/Account/logout`, {
+  await fetch('/api/Account/logout', {
     method: 'POST',
     credentials: 'include',  // 清除服务端 Cookie
   });
+  clearAuthCookie();          // ← 清除 middleware 读取的 auth-session cookie
   localStorage.clear();
   sessionStorage.clear();
-  router.replace('/login?loggedOut=true');
+  window.location.replace('/login?loggedOut=true');
   // ?loggedOut=true 参数阻止 SSO 自动重新登录
 }
 ```
@@ -366,14 +486,54 @@ const res = await fetch(`${API_BASE}/api/SomeModule/action`, {
 });
 ```
 
+### 带超时的 fetch 封装（lib/fetch.ts）
+
+所有 HTTP 请求推荐通过 `fetchWithTimeout` 发出，防止接口挂起导致 UI 卡死：
+
+```typescript
+import { fetchWithTimeout, RequestTimeoutError } from '@/lib/fetch';
+
+try {
+  const res = await fetchWithTimeout(`${API_BASE}/api/SomeModule/action`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(payload),
+    timeout: 15_000,  // 默认 15 秒，可按接口调整
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  // 处理 data...
+
+} catch (err) {
+  if (err instanceof RequestTimeoutError) {
+    toastError('Request timed out. Please try again.');
+  } else {
+    toastError('Network error.');
+  }
+}
+```
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `timeout` | number | `15000` | 超时毫秒数，超时后 abort 并抛出 `RequestTimeoutError` |
+
+> `fetchWithTimeout` 的签名与原生 `fetch` 完全一致，可无缝替换。
+
+---
+
 ### 标准后端接口列表
 
 #### 账户/认证
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/api/Account/login` | 账密登录，返回 JWT |
+| POST | `/api/Account/login` | 账密登录，返回 JWT + refreshToken |
 | POST | `/api/Account/sso-exchange` | SSO Cookie 换 JWT |
+| POST | `/api/Account/refresh` | refreshToken 换新 accessToken |
 | POST | `/api/Account/logout` | 登出，清除服务端 Cookie |
 | POST | `/api/Account/logon` | 用户注册 |
 | GET  | `/api/Account/profile` | 获取当前用户信息 |
@@ -404,10 +564,22 @@ const res = await fetch(`${API_BASE}/api/SomeModule/action`, {
 ### 401 处理模式
 
 ```typescript
+import { refreshAccessToken, clearAuthCookie } from '@/lib/auth';
+
 if (res.status === 401) {
-  localStorage.removeItem('token');
-  router.replace('/login');
-  return;
+  // 先尝试用 refreshToken 换新 token
+  const newToken = await refreshAccessToken();
+  if (newToken) {
+    // 重试原请求（一次）
+    return fetchWithTimeout(url, {
+      ...options,
+      headers: { ...options.headers, Authorization: `Bearer ${newToken}` },
+    });
+  }
+  // refresh 也失败 → 强制登出
+  clearAuthCookie();
+  localStorage.clear();
+  window.location.replace('/login');
 }
 ```
 
@@ -498,6 +670,52 @@ import { Home, Settings, Users, LogOut } from 'lucide-react';
 
 ---
 
+### 全局 Toast 通知系统（lib/toast.ts + components/ui/Toaster.tsx）
+
+基于 `CustomEvent` 实现，无需 Context Provider，在任意客户端组件中直接调用：
+
+```typescript
+import { toastSuccess, toastError, toastWarning, toastInfo } from '@/lib/toast';
+
+toastSuccess('保存成功');
+toastError('请求失败，请重试');
+toastWarning('表单存在未填项');
+toastInfo('正在加载数据...');
+
+// 自定义持续时间（毫秒，默认 4000）
+toastSuccess('导出完成', 6000);
+```
+
+`<Toaster />` 已在 `app/layout.tsx` 全局注册，**无需在页面内再次引入**。
+
+---
+
+### 全局错误边界（components/ErrorBoundary.tsx）
+
+捕获子组件树中未处理的 JS 错误，防止整页白屏崩溃：
+
+```typescript
+// app/layout.tsx —— 已默认包裹全应用
+<ErrorBoundary>
+  {children}
+</ErrorBoundary>
+
+// 也可为单个高风险模块提供自定义降级 UI
+<ErrorBoundary fallback={<p className="text-red-500">图表加载失败，请刷新。</p>}>
+  <ExpensiveChartWidget />
+</ErrorBoundary>
+```
+
+内置降级 UI 功能：
+- **Try Again** 按钮：重置 ErrorBoundary state，重新渲染子树（无需整页刷新）
+- **Go Home** 按钮：跳转 `/home`
+- 开发模式下展示完整错误堆栈（`process.env.NODE_ENV === 'development'`）
+- 生产模式隐藏技术细节，仅展示友好提示
+
+> `componentDidCatch` 中预留了监控服务接入点（Sentry 等），注释 `TODO: reportError(...)` 处替换即可。
+
+---
+
 ## 构建与部署
 
 ### 静态导出配置（next.config.ts）
@@ -530,6 +748,23 @@ server {
     root /var/www/my-app/out;
     index index.html;
 
+    # ── 静态导出路由保护（等效于 middleware.ts 的 Nginx 实现）────────────────
+    # 受保护路由：无 auth-session cookie → 跳转登录页
+    location ~ ^/(home|dashboard|projects|configuration) {
+        if ($cookie_auth-session = "") {
+            return 302 /login;
+        }
+        try_files $uri $uri/ $uri.html /index.html;
+    }
+
+    # 认证页：已登录 → 直接跳 dashboard（防止重复登录）
+    location ~ ^/(login|signup|forgot-password|reset-password)$ {
+        if ($cookie_auth-session != "") {
+            return 302 /dashboard;
+        }
+        try_files $uri $uri/ $uri.html /index.html;
+    }
+
     # API 反向代理
     location /api/ {
         proxy_pass http://backend-server:5000/api/;
@@ -550,6 +785,72 @@ server {
 - 所有 API 调用均指向外部后端（`NEXT_PUBLIC_API_URL`）
 - 需要 Nginx 做 `/api/*` 的反向代理转发
 - 跨域请求需在后端配置 CORS，前端携带 `credentials: 'include'` 时需设置 `Access-Control-Allow-Credentials: true`
+- `middleware.ts` 在 `output: 'export'` 模式下不运行，需用上方 Nginx 规则替代
+
+---
+
+## P2 稳健性加固
+
+> 本节汇总 P2 阶段新增的 4 项加固内容，复用本模板时可按需保留。
+
+### 功能清单
+
+| # | 功能 | 文件 | 说明 |
+|---|------|------|------|
+| P2-1 | 服务端路由保护 | `middleware.ts` | Edge Runtime 检查 `auth-session` cookie，保护受保护路由；附 Nginx 等效规则 |
+| P2-2 | refreshToken 自动续期 | `lib/auth.ts` | 已过期→尝试刷新；即将到期（5min）→后台静默刷新；refresh 也失效→强制登出 |
+| P2-3 | 请求超时（AbortController） | `lib/fetch.ts` | 默认 15s 超时，SSO 检测 8s，超时抛出 `RequestTimeoutError`，与普通网络错误区分 |
+| P2-4 | 全局 ErrorBoundary | `components/ErrorBoundary.tsx` | 捕获子树 JS 错误，防白屏；Try Again / Go Home 按钮；开发模式展示堆栈 |
+
+### 文件依赖关系
+
+```
+middleware.ts
+  └── 读取 Cookie: auth-session（由 lib/auth.ts setAuthCookie 写入）
+
+lib/auth.ts
+  ├── setAuthCookie / clearAuthCookie    ← login/page.tsx、(dashboard)/layout.tsx 调用
+  ├── ensureValidToken                   ← (dashboard)/layout.tsx 调用
+  └── refreshAccessToken                 ← ensureValidToken 内部调用
+
+lib/fetch.ts
+  └── fetchWithTimeout                   ← login/page.tsx 调用（可扩展到所有 API 请求）
+
+components/ErrorBoundary.tsx
+  └── 注入 app/layout.tsx，包裹 {children}
+```
+
+### 数据流：Token 生命周期
+
+```
+登录成功
+  → localStorage.token = JWT
+  → localStorage.refreshToken = refresh_Token
+  → document.cookie: auth-session=1; expires=<JWT exp>
+
+每次路由切换（Dashboard Layout）
+  → ensureValidToken()
+      ├── token 正常 → 放行
+      ├── token 即将过期（<5min）→ 后台静默刷新（不阻塞 UI）
+      ├── token 已过期 → refreshAccessToken()
+      │     ├── 成功 → 更新 token + cookie，放行
+      │     └── 失败 → clearAuthCookie() + localStorage.clear() → /login
+      └── 无 token → → /login
+
+登出
+  → clearAuthCookie()
+  → localStorage.clear()
+  → /login?loggedOut=true（阻止 SSO 自动重新登录）
+```
+
+### 快速开关（新项目复用时）
+
+| 功能 | 如何禁用 |
+|------|----------|
+| middleware.ts 路由保护 | 删除 `middleware.ts` 文件即可，不影响其他功能 |
+| refreshToken | 后端不返回 `refresh_Token` 字段则自动降级为"过期即登出" |
+| 请求超时 | 改回原生 `fetch`，或调大 `timeout` 参数（如 `60_000`） |
+| ErrorBoundary | 在 `app/layout.tsx` 移除 `<ErrorBoundary>` 包裹即可 |
 
 ---
 
@@ -636,6 +937,28 @@ A: 后端需配置 CORS，允许前端域名，并开启 `Access-Control-Allow-C
 **Q: 角色权限在开发环境不生效？**  
 A: 开发环境下 `NEXT_PUBLIC_BYPASS_ACCESS=true` 会绕过所有权限检查，这是预期行为。
 
+**Q: middleware.ts 有文件但路由保护没有生效？**  
+A: 检查 `next.config.ts` 是否保留了 `output: 'export'`。静态导出模式下 middleware 不运行（构建日志会显示警告）。开发时用 `npm run dev` 可以正常生效；生产环境需配置 Nginx 路由保护规则（参见[Nginx 部署示例](#nginx-部署示例)）。
+
+**Q: 登录后刷新页面被跳回登录页？**  
+A: `auth-session` cookie 和 localStorage token 的过期时间不一致。确认 `setAuthCookie(token)` 在 `handleSuccessfulLogin` 中被调用。也可打开 DevTools → Application → Cookies 检查 `auth-session` 是否存在。
+
+**Q: refreshToken 刷新一直失败？**  
+A: 后端接口 `POST /api/Account/refresh` 返回的字段名需与 `lib/auth.ts` 中 `refreshAccessToken()` 的解析逻辑一致（支持 `token / Token / accessToken / access_Token`）。可在 Network 面板抓包确认 response body 格式，不匹配时在 `refreshAccessToken` 中添加对应字段名即可。
+
+**Q: 某个请求超时时间需要超过 15 秒（如大文件上传）？**  
+A: 单独为该请求传入 `timeout` 参数：
+```typescript
+await fetchWithTimeout('/api/files/upload', {
+  method: 'POST',
+  body: formData,
+  timeout: 120_000,  // 2 分钟
+});
+```
+
+**Q: ErrorBoundary 能捕获异步错误（Promise rejection）吗？**  
+A: 不能。React ErrorBoundary 只捕获**渲染阶段**和**生命周期**中的同步错误。异步错误（`fetch` 失败、定时器内错误）需要在各自的 `try/catch` 中处理，通过 `toastError()` 向用户展示。
+
 ---
 
-*最后更新：2026-05-27 | 基于项目 my-app-next-01*
+*最后更新：2026-05-28 | 基于项目 my-app-next-01*

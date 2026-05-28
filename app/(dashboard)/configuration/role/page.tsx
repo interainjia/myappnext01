@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Copy, Trash2, Search, RefreshCw, X, Check, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -145,7 +146,7 @@ export default function RoleManagementPage() {
 
   const handleOpenModal = async (mode: 'add' | 'edit' | 'copy') => {
     if ((mode === 'edit' || mode === 'copy') && !selectedRoleId) {
-      alert("Please select a role first!");
+      toastWarning("Please select a role first!");
       return;
     }
 
@@ -176,7 +177,7 @@ export default function RoleManagementPage() {
 
   const handleDelete = async () => {
     if (!selectedRoleId) {
-      alert("Please select a role first!");
+      toastWarning("Please select a role first!");
       return;
     }
     if (!confirm("Are you sure you want to delete this role?")) return;
@@ -187,8 +188,12 @@ export default function RoleManagementPage() {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.status === 401) return handleUnauthorized();
-      if (res.ok) fetchRoles();
-      else alert("Delete failed");
+      if (res.ok) {
+        toastSuccess("Role deleted successfully.");
+        fetchRoles();
+      } else {
+        toastError("Failed to delete role.");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -197,7 +202,7 @@ export default function RoleManagementPage() {
   const handleSave = async (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (!formData.roleName?.trim()) {
-      alert("Role Name cannot be empty!");
+      toastWarning("Role Name cannot be empty!");
       return;
     }
     
@@ -269,10 +274,11 @@ export default function RoleManagementPage() {
       }
 
       setIsModalOpen(false);
+      toastSuccess("Role saved successfully!");
       fetchRoles();
     } catch (error) {
       console.error("Save error:", error);
-      alert(`保存失败。错误信息: ${(error as Error).message}`);
+      toastError(`Save failed: ${(error as Error).message}`);
     } finally {
       setSaving(false);
     }

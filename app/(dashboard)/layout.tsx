@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { MENU_ITEMS } from '@/constants/menus';
 import { getAccess } from '@/lib/access';
+import { toastError } from '@/lib/toast';
+import { ensureValidToken, clearAuthCookie } from '@/lib/auth';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOut, ChevronDown, User as UserIcon } from 'lucide-react';
@@ -24,57 +26,58 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setMounted(true);
     const savedName = localStorage.getItem('userName');
     if (savedName) setDisplayName(savedName);
-    const roles = JSON.parse(localStorage.getItem('userRoles') || '[]');
+    // 🔒 P1-#3：JSON.parse 加 try-catch，防止 localStorage 被篡改时 crash
+    let roles: string[] = [];
+    try {
+      roles = JSON.parse(localStorage.getItem('userRoles') || '[]');
+      if (!Array.isArray(roles)) roles = [];
+    } catch {
+      roles = [];
+    }
     setUserAccess(getAccess(roles));
   }, []);
 
-  // Token expiration check
+  // Token 校验 + 自动刷新
   useEffect(() => {
     if (!mounted) return;
 
-    const token = localStorage.getItem('token');
-    const isHome = pathname === '/home';
+    // /home 是欢迎页，不做强制 token 检查（与原逻辑保持一致）
+    if (pathname === '/home') return;
 
-    if (!isHome) {
-      let isExpired = !token;
-      
-      // Basic JWT expiration check if it's a JWT
-      if (token && token.includes('.')) {
-        try {
-          const payloadBase64 = token.split('.')[1];
-          const decodedPayload = JSON.parse(window.atob(payloadBase64));
-          if (decodedPayload.exp && Date.now() >= decodedPayload.exp * 1000) {
-            isExpired = true;
-          }
-        } catch (e) {
-          console.error('Error decoding token:', e);
-        }
-      }
+    const validateAndRefresh = async () => {
+      // ensureValidToken：已过期 → 尝试 refresh；即将过期 → 后台静默刷新
+      const validToken = await ensureValidToken();
 
-      if (isExpired) {
-        alert("Your login information has expired, please log in again.");
+      if (!validToken) {
+        toastError("Your session has expired, please log in again.");
+        clearAuthCookie();
         localStorage.clear();
-        window.location.href = '/login';
+        // 短暂延迟让 toast 先渲染，再跳转
+        setTimeout(() => { window.location.href = '/login'; }, 1200);
       }
-    }
+    };
+
+    validateAndRefresh();
   }, [mounted, pathname]);
 
   const handleLogout = async () => {
     try {
-      // 1. 尝试通知后端清理 Cookie (使用相对路径 /api/ 配合 Nginx 转发)
-      // 注意：这里建议去掉 API_BASE，直接用 /api/ 这种相对路径，最稳妥
+      // 1. 尝试通知后端清理 Cookie（使用相对路径 /api/ 配合 Nginx 转发）
       await fetch(`/api/Account/logout`, {
         method: 'POST',
-        credentials: 'include', 
+        credentials: 'include',
       });
     } catch (e) {
       console.error("Logout API call failed, but proceeding with local cleanup.");
     } finally {
-      // 2. 无论接口是否报错，必须清空本地状态并跳转
+      // 2. 清除 auth-session cookie，阻止 middleware 继续放行受保护路由
+      clearAuthCookie();
+
+      // 3. 无论接口是否报错，必须清空本地状态并跳转
       localStorage.clear();
       sessionStorage.clear();
 
-      // 3. 彻底跳转到登录页，并带上标记防止 SSO 自动检测逻辑再次循环
+      // 4. 彻底跳转到登录页，并带上标记防止 SSO 自动检测逻辑再次循环
       window.location.replace('/login?loggedOut=true');
     }
   };

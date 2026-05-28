@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Search, RefreshCw, X, Check, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -126,7 +127,7 @@ export default function UserProjectListPage() {
 
   const handleOpenModal = (mode: 'add' | 'edit') => {
     if (mode === 'edit' && !selectedEid) {
-      alert("Please select a user first!");
+      toastWarning("Please select a user first!");
       return;
     }
 
@@ -159,12 +160,12 @@ export default function UserProjectListPage() {
 
   const handleSave = async () => {
     if (!formData.eid.trim()) {
-      alert("Please input Account ID!");
+      toastWarning("Please input Account ID!");
       return;
     }
 
     if (selectedProjectNos.size === 0) {
-      alert("Please select at least one Project!");
+      toastWarning("Please select at least one Project!");
       return;
     }
 
@@ -186,12 +187,13 @@ export default function UserProjectListPage() {
       
       if (res.status === 401) return handleUnauthorized();
       if (!res.ok) throw new Error("Save failed");
-      
+
       setIsModalOpen(false);
+      toastSuccess("User projects saved successfully!");
       fetchData();
     } catch (error) {
       console.error("Save error:", error);
-      alert("Failed to save user projects.");
+      toastError("Failed to save user projects.");
     } finally {
       setSaving(false);
     }
