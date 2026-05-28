@@ -8,7 +8,6 @@ import { useSearchParams } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
-// 1. 将原来的主体逻辑提取到一个内部组件中
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -16,12 +15,13 @@ function ResetPasswordContent() {
   
   const [pageError, setPageError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [resetCode, setResetCode] = useState<string>('');
+  
+  // 新增：保存原始的加密 Token
+  const [encryptedToken, setEncryptedToken] = useState<string>('');
 
   const {
     register,
     handleSubmit,
-    setValue,
     getValues,
     formState: { errors },
   } = useForm();
@@ -30,46 +30,26 @@ function ResetPasswordContent() {
     const tokenParam = searchParams.get("token");
     
     if (tokenParam) {
-      try {
-        const b64 = tokenParam.replace(/ /g, '+');
-        
-        const decodedString = decodeURIComponent(
-          atob(b64).split('').map(c => 
-            '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-          ).join('')
-        );
-        
-        const tokenData = JSON.parse(decodedString);
-
-        if (tokenData.Eid) {
-          setValue("eid", tokenData.Eid);
-        } else {
-          throw new Error("Token 缺少 Eid 字段");
-        }
-        
-        if (tokenData.Code) {
-          setResetCode(tokenData.Code);
-        }
-        
-      } catch (error) {
-        console.error("Failed to parse reset token:", error);
-        setPageError("The password reset link is invalid or corrupted. Please request a new one.");
-      }
+      // 修复 Base64 在 URL 传输中 '+' 被替换为空格的问题
+      const safeToken = tokenParam.replace(/ /g, '+');
+      setEncryptedToken(safeToken);
+      // 注意：这里不再尝试用 atob() 去解密它！
+    } else {
+      setPageError("The password reset link is invalid or missing the security token. Please request a new one.");
     }
-  }, [searchParams, setValue]);
+  }, [searchParams]);
 
   const onSubmit = async (values: FieldValues) => {
     setIsLoading(true);
     setSubmitError(null);
 
     try {
+      // 注意：这里的接口字段需要和你的后端 Reset 接口匹配
       const response = await fetch(`${API_BASE}/api/Account/reset`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          eid: values.eid,
-          code: resetCode, 
-          oldPwd: "",
+          token: encryptedToken, // 直接把加密串发回给后端
           pwd: values.pwd,
           pwd2: values.pwd2
         }),
@@ -129,14 +109,7 @@ function ResetPasswordContent() {
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-[#333] mb-1">Email Address</label>
-            <input
-              {...register("eid", { required: "Account ID is missing from the link" })}
-              readOnly
-              className="w-full h-12 px-4 rounded border-none outline-none text-slate-500 bg-slate-200 cursor-not-allowed"
-            />
-          </div>
+          {/* 移除了 email 字段，因为前端现在不知道 email 是什么，它被安全地加密在 Token 里了 */}
 
           <div>
             <label className="block text-sm font-medium text-[#333] mb-1">New Password</label>
@@ -203,7 +176,6 @@ function ResetPasswordContent() {
   );
 }
 
-// 2. 导出默认组件：用 Suspense 包裹内部逻辑
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={

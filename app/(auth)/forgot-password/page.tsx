@@ -23,15 +23,15 @@ export default function ForgotPasswordPage() {
     setError(null);
 
     try {
-      const url = new URL(`${API_BASE}/api/Account/send-mail-forgot-password`);
-      url.searchParams.append('email', values.email);
-
-      const response = await fetch(url.toString(), {
+      // 1. 不再使用 URL.searchParams 拼接，直接使用干净的 URL
+      const response = await fetch(`${API_BASE}/api/Account/send-mail-forgot-password`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json', // 👈 恢复 JSON 声明
           'Accept': 'application/json'
-        }
+        },
+        // 2. 将 email 放入 body 中发送
+        body: JSON.stringify({ email: values.email }) 
       });
 
       let data = {};
