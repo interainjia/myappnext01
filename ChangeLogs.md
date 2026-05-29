@@ -165,3 +165,47 @@
    4. 加载状态闭环：在 handleOpenModal 中增加了错误分支的 setTreeLoading(false)
       调用，确保即使发生错误，界面也不会卡在加载动画中。
    5. 权限树组件健壮性：增强了递归树组件对子节点的校验。
+
+---
+---
+# 2026.05.29
+
+## Azure SSO 登出后立即自动重新登录问题修复
+
+**问题描述**
+用户通过 "Sign In With Azure" 登录后，点击 Logout，页面会立即自动重新登录，无法停留在登录页。
+
+**根本原因**
+问题来自两个未被正确清理的 Session：
+
+1. **Middleware 拦截问题**：`middleware.ts` 在检查 `isAuthenticated` 时，若后端通过 `Set-Cookie: HttpOnly` 设置了 `auth-session` cookie，前端的 `clearAuthCookie()`（基于 `document.cookie`）无法清除 HttpOnly cookie。导致 Middleware 认为用户仍已登录，直接将 `/login?loggedOut=true` 重定向到 `/dashboard`，用户根本看不到登录页。
+
+2. **UC SSO Session 未失效**：Azure 登录通过 `uc.crownbio.com` 完成，UC 服务器会在浏览器中写入自己的 Session Cookie（位于 `uc.crownbio.com` 或 `.crownbio.com` 域下）。用户登出时，`/api/Account/logout` 只能清除本 app 的会话，无法清除 UC 外部域的 SSO Cookie。下次访问 `/login`（不带 `?loggedOut=true`）时，`checkSsoLogin()` 调用 `/api/Account/sso-exchange`，UC Cookie 依然有效，后端直接返回新 JWT，触发自动登录。
+
+**修复内容**
+
+1. **`middleware.ts`**：放行带 `?loggedOut=true` 的登录页请求，不再将其重定向到 dashboard。
+   ```
+   // 修改前
+   if (isAuthPage && isAuthenticated) { redirect → /dashboard }
+
+   // 修改后
+   const isLoggingOut = request.nextUrl.searchParams.get('loggedOut') === 'true';
+   if (isAuthPage && isAuthenticated && !isLoggingOut) { redirect → /dashboard }
+   ```
+
+2. **`app/(auth)/login/page.tsx`**：用 `sessionStorage` 补充 URL 参数，将"刚注销"状态持久化到当前标签页的整个生命周期，防止 URL 参数丢失后 SSO 自动检测误触发。
+   ```
+   // 写入标记
+   sessionStorage.setItem('justLoggedOut', '1');
+
+   // 下次读取后清除，只跳过一次 SSO 检测
+   if (sessionStorage.getItem('justLoggedOut')) {
+     sessionStorage.removeItem('justLoggedOut');
+     setIsCheckingSso(false);
+     return;
+   }
+   ```
+
+**后续建议**
+根本性修复需联系 UC 服务器团队，确认是否提供 SSO 登出接口（如 `https://uc.crownbio.com/sysuser/logout?r=...`）。如果存在，logout 流程应改为先跳转到 UC 登出页清除 Azure SSO Session，再回跳到 `/login?loggedOut=true`。

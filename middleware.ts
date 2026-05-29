@@ -70,9 +70,11 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. 已登录 + 访问认证页 → 直接跳转 dashboard
+  //    例外：带 ?loggedOut=true 的登录页是注销后的落地页，必须放行
   const isAuthPage = AUTH_ONLY_PATHS.some((p) => pathname === p);
+  const isLoggingOut = request.nextUrl.searchParams.get('loggedOut') === 'true';
 
-  if (isAuthPage && isAuthenticated) {
+  if (isAuthPage && isAuthenticated && !isLoggingOut) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 

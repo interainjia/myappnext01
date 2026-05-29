@@ -25,9 +25,17 @@ export default function LoginPage() {
 
   // 🚀 核心逻辑 1：页面加载时，自动探测并尝试 Cookie 换 JWT
   useEffect(() => {
-    // 如果 URL 里有 logout 参数，说明用户刚注销，跳过自动检测
+    // 如果 URL 里有 loggedOut 参数，说明用户刚注销，写入 sessionStorage 作为持久标记
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('loggedOut')) {
+      sessionStorage.setItem('justLoggedOut', '1');
+      setIsCheckingSso(false);
+      return;
+    }
+
+    // sessionStorage 标记存在，也跳过 SSO 自动检测（防止刷新后标记丢失带来的循环）
+    if (sessionStorage.getItem('justLoggedOut')) {
+      sessionStorage.removeItem('justLoggedOut');
       setIsCheckingSso(false);
       return;
     }
