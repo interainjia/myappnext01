@@ -52,9 +52,9 @@ export default function MyProfilePage() {
         const data = result.data || result;
         
         setProfileData({
-          eid: data.eid || '',
-          userName: data.userName || '',
-          phone: data.phone || ''
+          eid: data.eid || data.Eid || '',
+          userName: data.userName || data.UserName || '',
+          phone: data.phone || data.Phone || data.mobile || data.Mobile || ''
         });
       } catch (error) {
         console.error("Error fetching profile:", error);
