@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Search, RefreshCw, X, Check, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Search, RefreshCw, Check, Loader2 } from 'lucide-react';
+import GlassModal, { ModalCancelButton, ModalConfirmButton } from '@/components/ui/GlassModal';
 import { useRouter } from 'next/navigation';
 import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
@@ -338,74 +339,58 @@ export default function UserProjectListPage() {
       </div>
 
       {/* === Modal: Add / Edit User Project === */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800">
-                {modalMode === 'add' ? 'Add User Project' : 'Edit User Project'}
-              </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+      <GlassModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalMode === 'add' ? 'Add User Project' : 'Edit User Project'}
+        size="md"
+        footer={
+          <>
+            <ModalCancelButton onClick={() => setIsModalOpen(false)}>Close</ModalCancelButton>
+            <ModalConfirmButton onClick={handleSave} loading={saving}>Submit</ModalConfirmButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Account ID</label>
+            <input
+              type="text"
+              value={formData.eid}
+              onChange={(e) => setFormData({...formData, eid: e.target.value})}
+              disabled={modalMode === 'edit'}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+              placeholder="Please input Account ID"
+            />
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-sm font-semibold text-slate-700">Project List</label>
+              <span className="text-xs text-blue-500 font-normal">{selectedProjectNos.size} selected</span>
             </div>
-            
-            <div className="p-6 space-y-4">
-              {/* Account ID Input */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Account ID</label>
-                <input 
-                  type="text" 
-                  value={formData.eid} 
-                  onChange={(e) => setFormData({...formData, eid: e.target.value})}
-                  disabled={modalMode === 'edit'}
-                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
-                  placeholder="Please input Account ID"
-                />
-              </div>
-
-              {/* Multiple Project Selector */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1 flex justify-between">
-                  <span>Project List</span>
-                  <span className="text-xs text-blue-500 font-normal">{selectedProjectNos.size} selected</span>
-                </label>
-                
-                <div className="border border-slate-200 text-slate-900 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
-                  {availableProjects.length === 0 ? (
-                    <div className="p-4 text-center text-sm text-slate-500">No projects available</div>
-                  ) : (
-                    availableProjects.map(proj => (
-                      <label 
-                        key={proj.tid} 
-                        className="flex items-center gap-2 p-2 hover:bg-slate-200/50 rounded cursor-pointer transition-colors"
-                      >
-                        <input 
-                          type="checkbox" 
-                          checked={selectedProjectNos.has(proj.projectNo)}
-                          onChange={(e) => handleToggleProject(proj.projectNo, e.target.checked)}
-                          className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="text-sm font-medium text-slate-700 select-none">
-                          {proj.projectNo}
-                        </span>
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">
-                Close
-              </button>
-              <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Submit
-              </button>
+            <div className="border border-slate-200 text-slate-900 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
+              {availableProjects.length === 0 ? (
+                <div className="p-4 text-center text-sm text-slate-500">No projects available</div>
+              ) : (
+                availableProjects.map(proj => (
+                  <label
+                    key={proj.tid}
+                    className="flex items-center gap-2 p-2 hover:bg-slate-200/50 rounded cursor-pointer transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedProjectNos.has(proj.projectNo)}
+                      onChange={(e) => handleToggleProject(proj.projectNo, e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="text-sm font-medium text-slate-700 select-none">{proj.projectNo}</span>
+                  </label>
+                ))
+              )}
             </div>
           </div>
         </div>
-      )}
+      </GlassModal>
 
     </div>
   );

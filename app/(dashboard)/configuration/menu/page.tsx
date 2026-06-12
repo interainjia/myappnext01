@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Save, X, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
+import GlassModal, { ModalCancelButton, ModalConfirmButton } from '@/components/ui/GlassModal';
 
 // 1. Get the base URL from your .env.development
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -22,6 +24,7 @@ export default function MenuManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Partial<MenuNode> | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // 3. 获取数据并处理格式
   const fetchMenus = async () => {
@@ -57,6 +60,45 @@ export default function MenuManagementPage() {
     fetchMenus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingMenu(null);
+  };
+
+  const handleSave = async () => {
+    if (!editingMenu?.name?.trim()) {
+      toastWarning("Menu name is required!");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/Menu`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          tid: editingMenu.tid || 0,
+          parentTid: editingMenu.parentTid ?? 0,
+          name: editingMenu.name.trim(),
+          url: editingMenu.url || '',
+          orderRule: editingMenu.orderRule || 0,
+          isActive: editingMenu.isActive ?? true,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      handleCloseModal();
+      toastSuccess("Menu saved successfully!");
+      fetchMenus();
+    } catch (error) {
+      console.error("Save error:", error);
+      toastError("Failed to save menu.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // 4. 删除逻辑
   const handleDelete = async (id: number) => {
@@ -112,7 +154,66 @@ export default function MenuManagementPage() {
         </table>
       </div>
       
-      {/* 弹窗部分省略 */}
+      {/* === Modal: Add / Edit Menu === */}
+      <GlassModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingMenu?.tid ? 'Edit Menu' : 'Add Menu'}
+        size="md"
+        footer={
+          <>
+            <ModalCancelButton onClick={handleCloseModal}>Close</ModalCancelButton>
+            <ModalConfirmButton onClick={handleSave} loading={saving}>Save</ModalConfirmButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={editingMenu?.name || ''}
+              onChange={(e) => setEditingMenu(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter menu name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Path (URL)</label>
+            <input
+              type="text"
+              value={editingMenu?.url || ''}
+              onChange={(e) => setEditingMenu(prev => ({ ...prev, url: e.target.value }))}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono text-sm"
+              placeholder="/path/to/page"
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Sort Order</label>
+              <input
+                type="number"
+                value={editingMenu?.orderRule ?? 0}
+                onChange={(e) => setEditingMenu(prev => ({ ...prev, orderRule: Number(e.target.value) }))}
+                className="w-full px-4 py-2 border border-slate-200 text-slate-900 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                min={0}
+              />
+            </div>
+            <div className="flex items-end pb-2 gap-2">
+              <input
+                type="checkbox"
+                id="menu-isActive"
+                checked={editingMenu?.isActive ?? true}
+                onChange={(e) => setEditingMenu(prev => ({ ...prev, isActive: e.target.checked }))}
+                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+              />
+              <label htmlFor="menu-isActive" className="text-sm font-semibold text-slate-700 cursor-pointer select-none">Active</label>
+            </div>
+          </div>
+        </div>
+      </GlassModal>
     </div>
   );
 }

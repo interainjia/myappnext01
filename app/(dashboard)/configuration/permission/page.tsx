@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Save, X, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // ✅ 1. 引入 useRouter
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
+import GlassModal, { ModalCancelButton, ModalConfirmButton } from '@/components/ui/GlassModal';
 
 // ✅ 2. 引入环境变量指向真实后端 API 地址
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -23,8 +25,9 @@ export default function PermissionManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Partial<MenuNode> | null>(null);
-  
-  const router = useRouter(); // ✅ 3. 初始化 router
+  const [saving, setSaving] = useState(false);
+
+  const router = useRouter();
 
   // 2. 获取数据并处理格式
   const fetchMenus = async () => {
@@ -69,6 +72,51 @@ export default function PermissionManagementPage() {
     fetchMenus(); 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingMenu(null);
+  };
+
+  const handleSave = async () => {
+    if (!editingMenu?.name?.trim()) {
+      toastWarning("Permission name is required!");
+      return;
+    }
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/Menu`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tid: editingMenu.tid || 0,
+          parentTid: editingMenu.parentTid ?? 0,
+          name: editingMenu.name.trim(),
+          url: editingMenu.url || '',
+          orderRule: editingMenu.orderRule || 0,
+          isActive: editingMenu.isActive ?? true,
+        }),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        router.push('/login');
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      handleCloseModal();
+      toastSuccess("Permission saved successfully!");
+      fetchMenus();
+    } catch (error) {
+      console.error("Save error:", error);
+      toastError("Failed to save permission.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // 3. 删除逻辑
   const handleDelete = async (id: number) => {
@@ -133,7 +181,66 @@ export default function PermissionManagementPage() {
         </table>
       </div>
       
-      {/* 弹窗部分省略，可参考上一次回复中的 Form 结构 */}
+      {/* === Modal: Add / Edit Permission === */}
+      <GlassModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingMenu?.tid ? 'Edit Permission' : 'Add Permission'}
+        size="md"
+        footer={
+          <>
+            <ModalCancelButton onClick={handleCloseModal}>Close</ModalCancelButton>
+            <ModalConfirmButton onClick={handleSave} loading={saving}>Save</ModalConfirmButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={editingMenu?.name || ''}
+              onChange={(e) => setEditingMenu(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter permission name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Path (URL)</label>
+            <input
+              type="text"
+              value={editingMenu?.url || ''}
+              onChange={(e) => setEditingMenu(prev => ({ ...prev, url: e.target.value }))}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono text-sm"
+              placeholder="/api/resource or /path/to/page"
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Sort Order</label>
+              <input
+                type="number"
+                value={editingMenu?.orderRule ?? 0}
+                onChange={(e) => setEditingMenu(prev => ({ ...prev, orderRule: Number(e.target.value) }))}
+                className="w-full px-4 py-2 border border-slate-200 text-slate-900 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                min={0}
+              />
+            </div>
+            <div className="flex items-end pb-2 gap-2">
+              <input
+                type="checkbox"
+                id="perm-isActive"
+                checked={editingMenu?.isActive ?? true}
+                onChange={(e) => setEditingMenu(prev => ({ ...prev, isActive: e.target.checked }))}
+                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+              />
+              <label htmlFor="perm-isActive" className="text-sm font-semibold text-slate-700 cursor-pointer select-none">Active</label>
+            </div>
+          </div>
+        </div>
+      </GlassModal>
     </div>
   );
 }

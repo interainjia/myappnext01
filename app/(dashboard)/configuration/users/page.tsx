@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Shield, Ban, Search, RefreshCw, X, Check, Loader2, Edit2, Save } from 'lucide-react';
+import { Plus, Shield, Ban, Search, RefreshCw, Check, Loader2, Edit2, Save, X } from 'lucide-react';
+import GlassModal, { ModalCancelButton, ModalConfirmButton } from '@/components/ui/GlassModal';
 import { useRouter } from 'next/navigation';
 import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
@@ -470,86 +471,80 @@ export default function SystemUsersPage() {
       </div>
 
       {/* === Modal: Add New User === */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800">Add New User</h3>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Login Name (English)</label>
-                <input 
-                  type="text" value={addFormData.eid} onChange={(e) => setAddFormData({...addFormData, eid: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="Enter login name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Name</label>
-                <input 
-                  type="text" value={addFormData.userName} onChange={(e) => setAddFormData({...addFormData, userName: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="Enter user name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-                <input 
-                  type="password" value={addFormData.pwd} onChange={(e) => setAddFormData({...addFormData, pwd: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="Enter password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Role</label>
-                <select 
-                  value={addFormData.roleTid} onChange={(e) => setAddFormData({...addFormData, roleTid: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
-                >
-                  <option value="">Select a role...</option>
-                  {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">Close</button>
-              <button onClick={handleAddUser} disabled={saving} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Submit
-              </button>
-            </div>
+      <GlassModal
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add New User"
+        size="md"
+        footer={
+          <>
+            <ModalCancelButton onClick={() => setIsAddModalOpen(false)}>Close</ModalCancelButton>
+            <ModalConfirmButton onClick={handleAddUser} loading={saving}>Submit</ModalConfirmButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Login Name (English)</label>
+            <input
+              type="text" value={addFormData.eid} onChange={(e) => setAddFormData({...addFormData, eid: e.target.value})}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter login name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Name</label>
+            <input
+              type="text" value={addFormData.userName} onChange={(e) => setAddFormData({...addFormData, userName: e.target.value})}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter user name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+            <input
+              type="password" value={addFormData.pwd} onChange={(e) => setAddFormData({...addFormData, pwd: e.target.value})}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter password"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Role</label>
+            <select
+              value={addFormData.roleTid} onChange={(e) => setAddFormData({...addFormData, roleTid: e.target.value})}
+              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Select a role...</option>
+              {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
+            </select>
           </div>
         </div>
-      )}
+      </GlassModal>
 
       {/* === Modal: Assign Role === */}
-      {isRoleModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800">Assign Role</h3>
-              <button onClick={() => setIsRoleModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
-            </div>
-            <div className="p-6">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Select Role for User</label>
-              <select 
-                value={assignRoleTid} onChange={(e) => setAssignRoleTid(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
-              >
-                <option value="">Please select...</option>
-                {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
-              </select>
-            </div>
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsRoleModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 placeholder-slate-500 rounded-lg hover:bg-slate-50">Close</button>
-              <button onClick={handleAssignRole} disabled={saving} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Submit
-              </button>
-            </div>
-          </div>
+      <GlassModal
+        open={isRoleModalOpen}
+        onClose={() => setIsRoleModalOpen(false)}
+        title="Assign Role"
+        size="md"
+        footer={
+          <>
+            <ModalCancelButton onClick={() => setIsRoleModalOpen(false)}>Close</ModalCancelButton>
+            <ModalConfirmButton onClick={handleAssignRole} loading={saving}>Submit</ModalConfirmButton>
+          </>
+        }
+      >
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Select Role for User</label>
+          <select
+            value={assignRoleTid} onChange={(e) => setAssignRoleTid(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+          >
+            <option value="">Please select...</option>
+            {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
+          </select>
         </div>
-      )}
+      </GlassModal>
 
     </div>
   );

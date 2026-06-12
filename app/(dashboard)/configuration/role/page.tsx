@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Copy, Trash2, Search, RefreshCw, X, Check, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Copy, Trash2, Search, RefreshCw, Check, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import GlassModal, { ModalCancelButton, ModalConfirmButton } from '@/components/ui/GlassModal';
 import { useRouter } from 'next/navigation';
 import { toastSuccess, toastError, toastWarning } from '@/lib/toast';
 
@@ -413,52 +414,49 @@ export default function RoleManagementPage() {
       </div>
 
       {/* Add/Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-lg font-bold text-slate-800">{modalMode === 'add' ? 'Add Role' : modalMode === 'edit' ? 'Edit Role' : 'Copy Role'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
-            </div>
-            <div className="p-6 flex-1 overflow-y-auto space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700">Role Name <span className="text-red-500">*</span></label>
-                <input type="text" value={formData.roleName} onChange={(e) => setFormData({...formData, roleName: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter unique role name" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700">Description</label>
-                <input type="text" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter role description" />
-              </div>
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <label className="text-sm font-semibold text-slate-700">Select Menu Permissions:</label>
-                <div className="p-4 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg max-h-64 overflow-y-auto">
-                  {treeLoading ? (
-                    <div className="flex justify-center py-8"><Loader2 className="animate-spin text-blue-500" /></div>
-                  ) : (
-                    <div className="space-y-1">
-                      {permissionTree.map(node => (
-                        <TreeNode 
-                          key={node.tid} 
-                          node={node} 
-                          checkedIds={checkedNodeIds}
-                          onToggle={handleToggleNodes} 
-                          onLoadChildren={handleLoadChildren} 
-                        />
-                      ))}
-                    </div>
-                  )}
+      <GlassModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalMode === 'add' ? 'Add Role' : modalMode === 'edit' ? 'Edit Role' : 'Copy Role'}
+        size="lg"
+        footer={
+          <>
+            <ModalCancelButton onClick={() => setIsModalOpen(false)}>Close</ModalCancelButton>
+            <ModalConfirmButton onClick={handleSave} loading={saving}>Save</ModalConfirmButton>
+          </>
+        }
+      >
+        <div className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">Role Name <span className="text-red-500">*</span></label>
+            <input type="text" value={formData.roleName} onChange={(e) => setFormData({...formData, roleName: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter unique role name" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">Description</label>
+            <input type="text" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter role description" />
+          </div>
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <label className="text-sm font-semibold text-slate-700">Select Menu Permissions:</label>
+            <div className="p-4 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg max-h-64 overflow-y-auto">
+              {treeLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-blue-500" /></div>
+              ) : (
+                <div className="space-y-1">
+                  {permissionTree.map(node => (
+                    <TreeNode
+                      key={node.tid}
+                      node={node}
+                      checkedIds={checkedNodeIds}
+                      onToggle={handleToggleNodes}
+                      onLoadChildren={handleLoadChildren}
+                    />
+                  ))}
                 </div>
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors">Close</button>
-              <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-70">
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Save
-              </button>
+              )}
             </div>
           </div>
         </div>
-      )}
+      </GlassModal>
     </div>
   );
 }

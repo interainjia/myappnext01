@@ -1,3 +1,43 @@
+# 2026.06.12
+
+## feat(ui): 新增 GlassModal 毛玻璃弹窗组件，全站替换旧 inline modal
+
+### 新增
+
+- **`components/ui/GlassModal.tsx`**：可复用的毛玻璃弹窗组件。
+  - 基于 Framer Motion `AnimatePresence` 实现丝滑入场/退场动画（spring 弹性进入，130ms easeIn 退出）。
+  - 遮罩层：`bg-slate-900/55 backdrop-blur-[3px]`；面板：`bg-white/82 backdrop-blur-2xl`，顶部品牌色渐变线。
+  - 支持 `size` 属性（`sm` / `md` / `lg` / `xl`），Portal 渲染至 `document.body`，自动锁定 body 滚动。
+  - 支持 Escape 关闭、遮罩点击关闭（`closeOnBackdrop`）、无障碍 `role="dialog"` 属性。
+  - 导出预设按钮：`ModalCancelButton`、`ModalConfirmButton`（含 `loading` / `variant='danger'` 状态）。
+- **`lib/useModal.ts`**：轻量 hook，返回 `{ open, onOpen, onClose, toggle }`，统一 modal 状态管理。
+- **`app/(dashboard)/demo/page.tsx`**：GlassModal 演示页，含 4 种典型用法（Info、Confirm Delete、Form、Large/Scrollable）。
+
+### 重构
+
+将以下页面的手写 `fixed inset-0` 内联 modal 全部替换为 `GlassModal`：
+
+| 页面 | Modal 数 | 说明 |
+|------|---------|------|
+| `configuration/users/page.tsx` | 2 | Add New User、Assign Role |
+| `configuration/role/page.tsx` | 1 | Add / Edit / Copy Role（含权限树） |
+| `configuration/projects/page.tsx` | 1 | Add / Edit User Project |
+
+### 补全
+
+menu / permission 页面的 modal 此前仅有状态声明但无 UI 实现，此次一并补全：
+
+| 页面 | 新增内容 |
+|------|---------|
+| `configuration/menu/page.tsx` | `handleSave` / `handleCloseModal` 函数 + GlassModal 表单（Name、Path、Sort Order、Active） |
+| `configuration/permission/page.tsx` | 同上，接口路径与字段含义对应 Permission 语境 |
+
+### 依赖
+
+- 新增 `framer-motion ^12.40.0`
+
+---
+
 # 2026.05.13
  新设计的首页采用现代化的仪表盘风格，包含以下核心模块：
 
