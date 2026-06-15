@@ -7,6 +7,15 @@ import Link from "next/link";
 import { jwtDecode } from "jwt-decode";
 import { setAuthCookie } from "@/lib/auth";
 import { fetchWithTimeout, RequestTimeoutError } from "@/lib/fetch";
+import GlassModal from "@/components/ui/GlassModal";
+
+const DOC_CONFIG = {
+  terms:   { title: 'Terms Of Use',          src: '/docs/terms-of-use.pdf' },
+  privacy: { title: 'Privacy Policy',        src: '/docs/privacy-policy.pdf' },
+  aup:     { title: 'Acceptable Use Policy', src: '/docs/acceptable-use-policy.pdf' },
+} as const;
+
+type DocKey = keyof typeof DOC_CONFIG;
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -16,6 +25,7 @@ export default function LoginPage() {
   // 临时将这行改成 false，先验证你的密码登录功能
   const [isCheckingSso, setIsCheckingSso] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeDoc, setActiveDoc] = useState<DocKey | null>(null);
 
   const {
     register,
@@ -244,6 +254,34 @@ export default function LoginPage() {
           </Link>
         </div>
       </form>
+
+      <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-1">
+        {(Object.keys(DOC_CONFIG) as DocKey[]).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setActiveDoc(key)}
+            className="text-xs text-[#999] hover:text-[#4db694] hover:underline transition-colors"
+          >
+            {DOC_CONFIG[key].title}
+          </button>
+        ))}
+      </div>
+
+      <GlassModal
+        open={activeDoc !== null}
+        onClose={() => setActiveDoc(null)}
+        title={activeDoc ? DOC_CONFIG[activeDoc].title : ''}
+        size="xl"
+      >
+        {activeDoc && (
+          <iframe
+            src={DOC_CONFIG[activeDoc].src}
+            className="w-full rounded"
+            style={{ height: '70vh', border: 'none' }}
+          />
+        )}
+      </GlassModal>
     </>
   );
 }
