@@ -268,6 +268,10 @@ export default function LoginPage() {
         ))}
       </div>
 
+      <p className="mt-2 text-[10px] text-gray-300 text-center select-none">
+        v{process.env.NEXT_PUBLIC_APP_VERSION}
+      </p>
+
       <GlassModal
         open={activeDoc !== null}
         onClose={() => setActiveDoc(null)}

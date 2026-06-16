@@ -188,6 +188,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <LogOut size={16} />
                   Logout
                 </button>
+
+                <div className="h-px bg-slate-100 my-1 mx-2"></div>
+
+                <Link
+                  href="/changelog"
+                  className="block px-4 py-1.5 text-[10px] text-slate-400 text-center hover:text-[#4db694] transition-colors"
+                >
+                  v{process.env.NEXT_PUBLIC_APP_VERSION}
+                </Link>
               </div>
             </div>
           </div>

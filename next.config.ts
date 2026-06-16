@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version ?? '0.0.0',
+  },
+
   // 1. 开启纯静态导出（Nginx 直接托管 HTML/CSS/JS）
   //
   // ⚠️  middleware.ts 路由保护说明：
