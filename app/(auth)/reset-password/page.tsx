@@ -77,13 +77,13 @@ function ResetPasswordContent() {
   return (
     <>
       <div className="mb-4">
-        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+        <h2 className="text-[26px] font-bold text-[#333] dark:text-slate-100 text-center p-[10px] m-0">
           Reset Password
         </h2>
-        <p className="text-sm text-[#666] text-center px-4">
-          {isSuccess 
-            ? "Your password has been successfully updated." 
-            : pageError 
+        <p className="text-sm text-[#666] dark:text-slate-400 text-center px-4">
+          {isSuccess
+            ? "Your password has been successfully updated."
+            : pageError
               ? "Invalid Reset Link"
               : "Enter your new password below to update your account."}
         </p>
@@ -91,11 +91,11 @@ function ResetPasswordContent() {
 
       {pageError ? (
         <div className="mt-6 text-center space-y-4">
-          <div className="bg-red-50 text-red-500 p-4 rounded-lg text-sm border border-red-100">
+          <div className="bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 p-4 rounded-lg text-sm border border-red-100 dark:border-red-900/60">
             {pageError}
           </div>
-          <Link 
-            href="/forgot-password" 
+          <Link
+            href="/forgot-password"
             className="inline-flex items-center justify-center px-6 py-2 bg-[#4db694] text-white rounded hover:bg-[#3d9a7d] transition-all"
           >
             Request New Link
@@ -104,7 +104,7 @@ function ResetPasswordContent() {
       ) : !isSuccess ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {submitError && (
-            <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+            <div className="bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 p-2 rounded text-xs border border-red-100 dark:border-red-900/60 text-center">
               {submitError}
             </div>
           )}
@@ -112,34 +112,34 @@ function ResetPasswordContent() {
           {/* 移除了 email 字段，因为前端现在不知道 email 是什么，它被安全地加密在 Token 里了 */}
 
           <div>
-            <label className="block text-sm font-medium text-[#333] mb-1">New Password</label>
+            <label className="block text-sm font-medium text-[#333] dark:text-slate-300 mb-1">New Password</label>
             <input
               type="password"
-              {...register("pwd", { 
+              {...register("pwd", {
                 required: "Please enter a new password",
                 minLength: { value: 6, message: "Password must be at least 6 characters" }
               })}
               placeholder="Enter new password"
-              className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+              className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {errors.pwd && (
-              <p className="text-xs text-red-500 mt-1">{errors.pwd.message as string}</p>
+              <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.pwd.message as string}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#333] mb-1">Confirm Password</label>
+            <label className="block text-sm font-medium text-[#333] dark:text-slate-300 mb-1">Confirm Password</label>
             <input
               type="password"
-              {...register("pwd2", { 
+              {...register("pwd2", {
                 required: "Please confirm your new password",
                 validate: value => value === getValues("pwd") || "Passwords do not match"
               })}
               placeholder="Re-enter new password"
-              className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+              className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {errors.pwd2 && (
-              <p className="text-xs text-red-500 mt-1">{errors.pwd2.message as string}</p>
+              <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.pwd2.message as string}</p>
             )}
           </div>
 
@@ -167,7 +167,7 @@ function ResetPasswordContent() {
 
       {!isSuccess && !pageError && (
         <div className="text-right mt-6">
-          <Link href="/login" className="text-[#7a94ff] text-[15px] hover:underline flex items-center justify-end gap-1">
+          <Link href="/login" className="text-[#7a94ff] dark:text-[#93a9ff] text-[15px] hover:underline flex items-center justify-end gap-1">
             <ArrowLeft size={14} /> Back to Login
           </Link>
         </div>
@@ -181,7 +181,7 @@ export default function ResetPasswordPage() {
     <Suspense fallback={
       <div className="flex flex-col items-center justify-center min-h-[300px]">
         <Loader2 className="animate-spin text-[#4db694] mb-4" size={40} />
-        <p className="text-[#666]">Loading...</p>
+        <p className="text-[#666] dark:text-slate-400">Loading...</p>
       </div>
     }>
       <ResetPasswordContent />

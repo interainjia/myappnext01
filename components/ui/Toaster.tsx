@@ -20,32 +20,32 @@ const STYLE_MAP: Record<ToastType, {
   iconClass: string;
 }> = {
   success: {
-    container: 'bg-green-50 border-green-200',
-    text:      'text-green-900',
-    close:     'text-green-400 hover:text-green-700',
+    container: 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800/60',
+    text:      'text-green-900 dark:text-green-300',
+    close:     'text-green-400 hover:text-green-700 dark:hover:text-green-200',
     Icon:      CheckCircle2,
-    iconClass: 'text-green-500',
+    iconClass: 'text-green-500 dark:text-green-400',
   },
   error: {
-    container: 'bg-red-50 border-red-200',
-    text:      'text-red-900',
-    close:     'text-red-400 hover:text-red-700',
+    container: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60',
+    text:      'text-red-900 dark:text-red-300',
+    close:     'text-red-400 hover:text-red-700 dark:hover:text-red-200',
     Icon:      AlertCircle,
-    iconClass: 'text-red-500',
+    iconClass: 'text-red-500 dark:text-red-400',
   },
   warning: {
-    container: 'bg-amber-50 border-amber-200',
-    text:      'text-amber-900',
-    close:     'text-amber-400 hover:text-amber-700',
+    container: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60',
+    text:      'text-amber-900 dark:text-amber-300',
+    close:     'text-amber-400 hover:text-amber-700 dark:hover:text-amber-200',
     Icon:      AlertTriangle,
-    iconClass: 'text-amber-500',
+    iconClass: 'text-amber-500 dark:text-amber-400',
   },
   info: {
-    container: 'bg-blue-50 border-blue-200',
-    text:      'text-blue-900',
-    close:     'text-blue-400 hover:text-blue-700',
+    container: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60',
+    text:      'text-blue-900 dark:text-blue-300',
+    close:     'text-blue-400 hover:text-blue-700 dark:hover:text-blue-200',
     Icon:      Info,
-    iconClass: 'text-blue-500',
+    iconClass: 'text-blue-500 dark:text-blue-400',
   },
 };
 

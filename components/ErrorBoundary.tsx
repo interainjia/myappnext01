@@ -77,21 +77,21 @@ export default class ErrorBoundary extends React.Component<
 
     // ── 内置降级 UI ──────────────────────────────────────────────────────────
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-slate-200 p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-8 text-center">
 
           {/* 图标 */}
           <div className="flex justify-center mb-5">
-            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
-              <AlertTriangle size={32} className="text-red-500" />
+            <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center">
+              <AlertTriangle size={32} className="text-red-500 dark:text-red-400" />
             </div>
           </div>
 
           {/* 标题 */}
-          <h2 className="text-xl font-bold text-slate-800 mb-2">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
             Something went wrong
           </h2>
-          <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">
             An unexpected error occurred. You can try refreshing the page or
             return to the home screen.
           </p>
@@ -99,10 +99,10 @@ export default class ErrorBoundary extends React.Component<
           {/* 错误详情（仅开发模式展示） */}
           {process.env.NODE_ENV === 'development' && error && (
             <details className="mb-6 text-left">
-              <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600 select-none">
+              <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 select-none">
                 Error details (dev only)
               </summary>
-              <pre className="mt-2 p-3 bg-slate-50 rounded-lg text-xs text-red-600 overflow-auto whitespace-pre-wrap break-words border border-slate-200 max-h-48">
+              <pre className="mt-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs text-red-600 dark:text-red-400 overflow-auto whitespace-pre-wrap break-words border border-slate-200 dark:border-slate-700 max-h-48">
                 {error.message}
                 {'\n'}
                 {error.stack}
@@ -121,7 +121,7 @@ export default class ErrorBoundary extends React.Component<
             </button>
             <button
               onClick={() => { window.location.href = '/home'; }}
-              className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
+              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors"
             >
               Go Home
             </button>

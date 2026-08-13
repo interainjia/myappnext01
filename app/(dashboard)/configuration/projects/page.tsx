@@ -204,7 +204,7 @@ export default function UserProjectListPage() {
     <div className="max-w-[1200px] mx-auto space-y-6">
       
       {/* Top Toolbar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
         
         {/* Actions */}
         <div className="flex gap-2">
@@ -225,9 +225,9 @@ export default function UserProjectListPage() {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()}
-              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 placeholder-slate-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
           <div className="relative">
             <input 
@@ -236,9 +236,9 @@ export default function UserProjectListPage() {
               value={searchEid}
               onChange={(e) => setSearchEid(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()}
-              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 placeholder-slate-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
           <div className="relative">
             <input 
@@ -247,9 +247,9 @@ export default function UserProjectListPage() {
               value={searchProjectNo}
               onChange={(e) => setSearchProjectNo(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()}
-              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 placeholder-slate-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
             />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
           
           <button onClick={handleSearchTrigger} className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium">
@@ -259,28 +259,28 @@ export default function UserProjectListPage() {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left whitespace-nowrap">
-            <thead className="bg-slate-50 border-b border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100">
               <tr>
                 <th className="px-6 py-4 w-12 text-center"></th>
-                <th className="px-6 py-4 w-[15%] text-sm font-semibold text-slate-600">Account ID</th>
-                <th className="px-6 py-4 w-[15%] text-sm font-semibold text-slate-600">User Name</th>
-                <th className="px-6 py-4 w-[70%] text-sm font-semibold text-slate-600">Project No</th>
+                <th className="px-6 py-4 w-[15%] text-sm font-semibold text-slate-600 dark:text-slate-300">Account ID</th>
+                <th className="px-6 py-4 w-[15%] text-sm font-semibold text-slate-600 dark:text-slate-300">User Name</th>
+                <th className="px-6 py-4 w-[70%] text-sm font-semibold text-slate-600 dark:text-slate-300">Project No</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={4} className="py-20 text-center"><Loader2 className="mx-auto animate-spin text-slate-400" size={24} /></td></tr>
+                <tr><td colSpan={4} className="py-20 text-center"><Loader2 className="mx-auto animate-spin text-slate-400 dark:text-slate-500" size={24} /></td></tr>
               ) : data.length === 0 ? (
-                <tr><td colSpan={4} className="py-20 text-center text-slate-500">No data available</td></tr>
+                <tr><td colSpan={4} className="py-20 text-center text-slate-500 dark:text-slate-400">No data available</td></tr>
               ) : (
                 data.map(row => (
                   <tr 
                     key={row.eid} 
                     onClick={() => setSelectedEid(row.eid)}
-                    className={`border-b border-slate-50 cursor-pointer transition-colors ${selectedEid === row.eid ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}
+                    className={`border-b border-slate-50 dark:border-slate-800 cursor-pointer transition-colors ${selectedEid === row.eid ? 'bg-blue-50/50 dark:bg-blue-950/40' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                   >
                     <td className="px-6 py-4 text-center">
                       <input 
@@ -288,15 +288,15 @@ export default function UserProjectListPage() {
                         name="rowSelection"
                         checked={selectedEid === row.eid} 
                         onChange={() => setSelectedEid(row.eid)}
-                        className="w-4 h-4 text-blue-600 cursor-pointer"
+                        className="w-4 h-4 text-blue-600 dark:text-blue-400 cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-800">{row.eid}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{row.userName}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600 whitespace-normal break-words max-w-xl leading-relaxed">
+                    <td className="px-6 py-4 text-sm font-medium text-slate-800 dark:text-slate-100">{row.eid}</td>
+                    <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">{row.userName}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-normal break-words max-w-xl leading-relaxed">
                       {row.projectNo ? (
                         row.projectNo.split(',').map((proj, idx) => (
-                          <span key={idx} className="inline-block bg-slate-100 border border-slate-200 text-slate-900 rounded px-2 py-0.5 text-xs mr-1.5 mb-1.5">
+                          <span key={idx} className="inline-block bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded px-2 py-0.5 text-xs mr-1.5 mb-1.5">
                             {proj.trim()}
                           </span>
                         ))
@@ -310,27 +310,27 @@ export default function UserProjectListPage() {
         </div>
         
         {/* Pagination Controls */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-          <span className="text-sm text-slate-500">Total {total} records</span>
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 dark:bg-slate-800">
+          <span className="text-sm text-slate-500 dark:text-slate-400">Total {total} records</span>
           <div className="flex gap-2 items-center">
             <select 
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPageIndex(1); }}
-              className="px-2 py-1 border border-slate-200 text-slate-900 rounded text-sm bg-white"
+              className="px-2 py-1 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded text-sm bg-white dark:bg-slate-800"
             >
               {[10, 25, 50, 75, 100].map(size => <option key={size} value={size}>{size} per page</option>)}
             </select>
             <button 
               disabled={pageIndex === 1} 
               onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-              className="px-3 py-1 border border-slate-200 text-slate-900 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded text-sm bg-white dark:bg-slate-800 disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               Previous
             </button>
             <button 
               disabled={pageIndex * pageSize >= total} 
               onClick={() => setPageIndex(p => p + 1)}
-              className="px-3 py-1 border border-slate-200 text-slate-900 rounded text-sm bg-white disabled:opacity-50 hover:bg-slate-100"
+              className="px-3 py-1 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded text-sm bg-white dark:bg-slate-800 disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               Next
             </button>
@@ -353,37 +353,37 @@ export default function UserProjectListPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Account ID</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Account ID</label>
             <input
               type="text"
               value={formData.eid}
               onChange={(e) => setFormData({...formData, eid: e.target.value})}
               disabled={modalMode === 'edit'}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 dark:disabled:bg-slate-700 disabled:text-slate-500 dark:disabled:text-slate-400"
               placeholder="Please input Account ID"
             />
           </div>
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-sm font-semibold text-slate-700">Project List</label>
-              <span className="text-xs text-blue-500 font-normal">{selectedProjectNos.size} selected</span>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Project List</label>
+              <span className="text-xs text-blue-500 dark:text-blue-400 font-normal">{selectedProjectNos.size} selected</span>
             </div>
-            <div className="border border-slate-200 text-slate-900 rounded-lg p-2 bg-slate-50 max-h-64 overflow-y-auto space-y-1">
+            <div className="border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 max-h-64 overflow-y-auto space-y-1">
               {availableProjects.length === 0 ? (
-                <div className="p-4 text-center text-sm text-slate-500">No projects available</div>
+                <div className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">No projects available</div>
               ) : (
                 availableProjects.map(proj => (
                   <label
                     key={proj.tid}
-                    className="flex items-center gap-2 p-2 hover:bg-slate-200/50 rounded cursor-pointer transition-colors"
+                    className="flex items-center gap-2 p-2 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={selectedProjectNos.has(proj.projectNo)}
                       onChange={(e) => handleToggleProject(proj.projectNo, e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                      className="w-4 h-4 text-blue-600 dark:text-blue-400 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer"
                     />
-                    <span className="text-sm font-medium text-slate-700 select-none">{proj.projectNo}</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 select-none">{proj.projectNo}</span>
                   </label>
                 ))
               )}

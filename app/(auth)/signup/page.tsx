@@ -54,14 +54,14 @@ export default function SignUpPage() {
   return (
     <>
       <div className="mb-2">
-        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+        <h2 className="text-[26px] font-bold text-[#333] dark:text-slate-100 text-center p-[10px] m-0">
           Create Account
         </h2>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+          <div className="bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 p-2 rounded text-xs border border-red-100 dark:border-red-900/60 text-center">
             {error}
           </div>
         )}
@@ -71,17 +71,17 @@ export default function SignUpPage() {
           <input
             {...register("username", { required: "Please enter a username" })}
             placeholder="Username"
-            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           {errors.username && (
-            <p className="text-xs text-red-500 mt-1">{errors.username.message as string}</p>
+            <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.username.message as string}</p>
           )}
         </div>
 
         {/* Email Field */}
         <div>
           <input
-            {...register("email", { 
+            {...register("email", {
               required: "Please enter your email",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -90,26 +90,26 @@ export default function SignUpPage() {
             })}
             type="email"
             placeholder="Email Address"
-            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           {errors.email && (
-            <p className="text-xs text-red-500 mt-1">{errors.email.message as string}</p>
+            <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.email.message as string}</p>
           )}
         </div>
 
         {/* Password Field */}
         <div>
           <input
-            {...register("password", { 
+            {...register("password", {
               required: "Please set a password",
               minLength: { value: 6, message: "Minimum 6 characters" }
             })}
             type="password"
             placeholder="Password"
-            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           {errors.password && (
-            <p className="text-xs text-red-500 mt-1">{errors.password.message as string}</p>
+            <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.password.message as string}</p>
           )}
         </div>
 
@@ -126,9 +126,9 @@ export default function SignUpPage() {
           )}
         </button>
 
-        <div className="text-right mt-4 text-[15px] text-[#666]">
+        <div className="text-right mt-4 text-[15px] text-[#666] dark:text-slate-400">
           Already have an account?{' '}
-          <Link href="/login" className="text-[#7a94ff] hover:underline">
+          <Link href="/login" className="text-[#7a94ff] dark:text-[#93a9ff] hover:underline">
             Sign In
           </Link>
         </div>

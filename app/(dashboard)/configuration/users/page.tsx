@@ -285,7 +285,7 @@ export default function SystemUsersPage() {
     <div className="max-w-[1400px] mx-auto space-y-6">
       
       {/* Top Toolbar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-wrap gap-4 items-center justify-between">
         
         {/* Actions */}
         <div className="flex gap-2">
@@ -311,9 +311,9 @@ export default function SystemUsersPage() {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
-              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+              className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
             />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
           <div className="relative">
             <input 
@@ -322,12 +322,12 @@ export default function SystemUsersPage() {
               value={searchEid}
               onChange={(e) => setSearchEid(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
-              className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+              className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
             />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
           <select 
-            className="px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
             value={filterRoleId}
             onChange={(e) => { setFilterRoleId(Number(e.target.value)); }}
           >
@@ -336,40 +336,40 @@ export default function SystemUsersPage() {
               <option key={r.tid} value={r.tid}>{r.roleName}</option>
             ))}
           </select>
-          <button onClick={fetchUsers} className="p-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors" title="Refresh">
+          <button onClick={fetchUsers} className="p-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" title="Refresh">
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
       {/* User Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left whitespace-nowrap">
-            <thead className="bg-slate-50 border-b border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-700">
               <tr>
                 <th className="px-6 py-4 w-12 text-center"></th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Login Account</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Mobile</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Last Login IP</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Last Login Time</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Assigned Role</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Created By</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">UserAgent</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Login Account</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Name</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Mobile</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Last Login IP</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Last Login Time</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Assigned Role</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Created By</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">UserAgent</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} className="py-20 text-center"><Loader2 className="mx-auto animate-spin text-slate-400" size={24} /></td></tr>
+                <tr><td colSpan={9} className="py-20 text-center"><Loader2 className="mx-auto animate-spin text-slate-400 dark:text-slate-500" size={24} /></td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan={9} className="py-20 text-center text-slate-500">No data available</td></tr>
+                <tr><td colSpan={9} className="py-20 text-center text-slate-500 dark:text-slate-400">No data available</td></tr>
               ) : (
                 users.map(user => (
                   <tr 
                     key={user.tid} 
                     onClick={() => setSelectedUserId(user.tid)}
-                    className={`border-b border-slate-50 cursor-pointer transition-colors ${selectedUserId === user.tid ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}
+                    className={`border-b border-slate-50 dark:border-slate-800 cursor-pointer transition-colors ${selectedUserId === user.tid ? 'bg-blue-50/50 dark:bg-blue-950/40' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                   >
                     <td className="px-6 py-4 text-center">
                       <input 
@@ -377,31 +377,31 @@ export default function SystemUsersPage() {
                         name="userSelection"
                         checked={selectedUserId === user.tid} 
                         onChange={() => setSelectedUserId(user.tid)}
-                        className="w-4 h-4 text-blue-600 cursor-pointer"
+                        className="w-4 h-4 text-blue-600 dark:text-blue-400 cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-800">{user.eid}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{user.userName}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-800 dark:text-slate-100">{user.eid}</td>
+                    <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">{user.userName}</td>
                     
                     {/* Editable Mobile Field */}
-                    <td className="px-6 py-4 text-sm text-slate-600" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300" onClick={(e) => e.stopPropagation()}>
                       {editingPhoneId === user.tid ? (
                         <div className="flex items-center gap-2">
                           <input 
                             type="text" 
-                            className="w-32 px-2 py-1 text-sm border border-blue-400 rounded focus:outline-none"
+                            className="w-32 px-2 py-1 text-sm border border-blue-400 dark:border-blue-500 rounded focus:outline-none dark:bg-slate-800 dark:text-slate-100"
                             value={editingPhoneValue}
                             onChange={(e) => setEditingPhoneValue(e.target.value)}
                             autoFocus
                           />
                           <button onClick={() => handlePhoneEditSave(user.tid)} className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600"><Save size={14} /></button>
-                          <button onClick={() => setEditingPhoneId(null)} className="p-1 bg-slate-200 text-slate-600 rounded hover:bg-slate-300"><X size={14} /></button>
+                          <button onClick={() => setEditingPhoneId(null)} className="p-1 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded hover:bg-slate-300 dark:hover:bg-slate-600"><X size={14} /></button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 group">
                           <span>{user.phone || '-'}</span>
                           <button 
-                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-500 transition-opacity"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 transition-opacity"
                             onClick={() => { setEditingPhoneId(user.tid); setEditingPhoneValue(user.phone || ""); }}
                           >
                             <Edit2 size={14} />
@@ -410,15 +410,15 @@ export default function SystemUsersPage() {
                       )}
                     </td>
 
-                    <td className="px-6 py-4 text-sm text-slate-500">{user.loginIp || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{user.lastLoginTime || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700" title={user.roleDesc}>
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium border border-slate-200 text-slate-900 placeholder-slate-500">
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{user.loginIp || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{user.lastLoginTime || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300" title={user.roleDesc}>
+                      <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md text-xs font-medium border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500">
                         {user.roleName || '-'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{user.createUser}</td>
-                    <td className="px-6 py-4 text-sm text-slate-400 font-mono text-xs" title={user.userAgent}>
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{user.createUser}</td>
+                    <td className="px-6 py-4 text-sm text-slate-400 dark:text-slate-500 font-mono text-xs" title={user.userAgent}>
                       {truncateText(user.userAgent, 20)}
                     </td>
                   </tr>
@@ -429,8 +429,8 @@ export default function SystemUsersPage() {
         </div>
         
         {/* Basic Pagination Controls */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-          <span className="text-sm text-slate-500">Total {total} records</span>
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800">
+          <span className="text-sm text-slate-500 dark:text-slate-400">Total {total} records</span>
           
           <div className="flex items-center gap-4">
             {/* Page Size Selector */}
@@ -440,7 +440,7 @@ export default function SystemUsersPage() {
                 setPageSize(Number(e.target.value));
                 setPageIndex(1); // Reset to first page when changing page size
               }}
-              className="px-3 py-1.5 border border-slate-200 text-slate-900 rounded text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded text-sm bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
             >
               <option value={10}>10 per page</option>
               <option value={25}>25 per page</option>
@@ -454,14 +454,14 @@ export default function SystemUsersPage() {
               <button 
                 disabled={pageIndex === 1} 
                 onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Previous
               </button>
               <button 
                 disabled={pageIndex * pageSize >= total} 
                 onClick={() => setPageIndex(p => p + 1)}
-                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Next
               </button>
@@ -485,34 +485,34 @@ export default function SystemUsersPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Login Name (English)</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Login Name (English)</label>
             <input
               type="text" value={addFormData.eid} onChange={(e) => setAddFormData({...addFormData, eid: e.target.value})}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Enter login name"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Name</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Name</label>
             <input
               type="text" value={addFormData.userName} onChange={(e) => setAddFormData({...addFormData, userName: e.target.value})}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Enter user name"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
             <input
               type="password" value={addFormData.pwd} onChange={(e) => setAddFormData({...addFormData, pwd: e.target.value})}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Enter password"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Role</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Role</label>
             <select
               value={addFormData.roleTid} onChange={(e) => setAddFormData({...addFormData, roleTid: e.target.value})}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-800"
             >
               <option value="">Select a role...</option>
               {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}
@@ -535,10 +535,10 @@ export default function SystemUsersPage() {
         }
       >
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Select Role for User</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Select Role for User</label>
           <select
             value={assignRoleTid} onChange={(e) => setAssignRoleTid(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-800"
           >
             <option value="">Please select...</option>
             {roles.map(r => <option key={r.tid} value={r.tid}>{r.roleName}</option>)}

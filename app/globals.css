@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 让 dark: 变体跟随 <html> 上的 .dark class，而不是系统 prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @font-face {
   font-family: 'Avenir Next LT Pro';
   src: url('/fonts/AvenirNextVariableRoman_font.woff2') format('woff2'),
@@ -29,11 +32,9 @@
   --font-sans: 'Avenir Next LT Pro', Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 body {

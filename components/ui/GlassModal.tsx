@@ -85,7 +85,7 @@ export default function GlassModal({
         // ── Overlay ──────────────────────────────────────────────────────────
         <motion.div
           className="fixed inset-0 z-[9998] flex items-center justify-center p-4
-                     bg-slate-900/55 backdrop-blur-[3px]"
+                     bg-slate-900/55 dark:bg-slate-950/70 backdrop-blur-[3px]"
           variants={overlayVariants}
           initial="hidden"
           animate="visible"
@@ -100,11 +100,11 @@ export default function GlassModal({
             ref={panelRef}
             className={`
               relative w-full ${SIZE_CLASS[size]}
-              bg-white/82 backdrop-blur-2xl
-              border border-white/60
+              bg-white/82 dark:bg-slate-900/85 backdrop-blur-2xl
+              border border-white/60 dark:border-slate-700/60
               rounded-2xl overflow-hidden
               shadow-[0_32px_80px_rgba(15,23,42,0.22),0_8px_24px_rgba(15,23,42,0.10)]
-              ring-1 ring-slate-900/5
+              ring-1 ring-slate-900/5 dark:ring-slate-100/5
             `}
             variants={panelVariants}
             initial="hidden"
@@ -119,9 +119,9 @@ export default function GlassModal({
 
             {/* ── Header ─────────────────────────────────────────────────── */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-200/60">
+              <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-200/60 dark:border-slate-700/60">
                 {title && (
-                  <h2 className="text-base font-semibold text-slate-800 leading-snug">
+                  <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100 leading-snug">
                     {title}
                   </h2>
                 )}
@@ -131,6 +131,7 @@ export default function GlassModal({
                     className="
                       ml-auto -mr-1 flex items-center justify-center w-8 h-8 rounded-lg
                       text-slate-400 hover:text-slate-700 hover:bg-slate-100/80
+                      dark:hover:text-slate-200 dark:hover:bg-slate-700/60
                       transition-colors duration-150
                     "
                     aria-label="Close"
@@ -142,13 +143,13 @@ export default function GlassModal({
             )}
 
             {/* ── Body ───────────────────────────────────────────────────── */}
-            <div className="px-6 py-5 text-slate-700 text-sm leading-relaxed overflow-y-auto max-h-[65vh]">
+            <div className="px-6 py-5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed overflow-y-auto max-h-[65vh]">
               {children}
             </div>
 
             {/* ── Footer ─────────────────────────────────────────────────── */}
             {footer && (
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200/60 bg-slate-50/60">
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200/60 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/60">
                 {footer}
               </div>
             )}
@@ -178,6 +179,8 @@ export function ModalCancelButton({
         px-4 py-2 text-sm font-medium rounded-lg
         text-slate-600 bg-white border border-slate-200
         hover:bg-slate-50 hover:border-slate-300
+        dark:text-slate-300 dark:bg-slate-800 dark:border-slate-700
+        dark:hover:bg-slate-700 dark:hover:border-slate-600
         active:scale-[0.98]
         transition-all duration-150
       "

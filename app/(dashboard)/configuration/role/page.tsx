@@ -313,7 +313,7 @@ export default function RoleManagementPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       
       {/* Top Toolbar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-3 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-wrap gap-3 items-center justify-between">
         <div className="flex gap-2">
           <button onClick={() => handleOpenModal('add')} className="flex items-center gap-1.5 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"><Plus size={16} /> Add Role</button>
           <button onClick={() => handleOpenModal('edit')} className="flex items-center gap-1.5 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors text-sm font-medium"><Pencil size={16} /> Edit Role</button>
@@ -323,47 +323,47 @@ export default function RoleManagementPage() {
 
         <div className="flex gap-2 items-center">
           <div className="relative">
-            <input type="text" name="search_dummy_role_name" autoComplete="off" placeholder="Search Role Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()} className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40" />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <input type="text" name="search_dummy_role_name" autoComplete="off" placeholder="Search Role Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()} className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-500 dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
           <div className="relative">
-            <input type="text" name="search_dummy_creator" autoComplete="off" placeholder="Search Creator" value={searchCreator} onChange={(e) => setSearchCreator(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()} className="pl-9 pr-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36" />
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+            <input type="text" name="search_dummy_creator" autoComplete="off" placeholder="Search Creator" value={searchCreator} onChange={(e) => setSearchCreator(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearchTrigger()} className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-500 dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
           </div>
-          <button onClick={handleSearchTrigger} className="p-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg hover:bg-slate-50 transition-colors" title="Refresh">
+          <button onClick={handleSearchTrigger} className="p-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" title="Refresh">
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
       {/* Role Table Wrapper */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-700">
               <tr>
                 <th className="px-6 py-4 w-12 text-center"></th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Role ID</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Role Name</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Description</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600">Creator</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Role ID</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Role Name</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Description</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Creator</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="mx-auto animate-spin text-slate-400" size={24} /></td></tr>
+                <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="mx-auto animate-spin text-slate-400 dark:text-slate-500" size={24} /></td></tr>
               ) : roles.length === 0 ? (
-                <tr><td colSpan={5} className="py-20 text-center text-slate-500">No data available</td></tr>
+                <tr><td colSpan={5} className="py-20 text-center text-slate-500 dark:text-slate-400">No data available</td></tr>
               ) : (
                 roles.map(role => (
-                  <tr key={role.tid} onClick={() => setSelectedRoleId(role.tid)} className={`border-b border-slate-50 cursor-pointer transition-colors ${selectedRoleId === role.tid ? 'bg-blue-50' : 'hover:bg-slate-50'}`}>
+                  <tr key={role.tid} onClick={() => setSelectedRoleId(role.tid)} className={`border-b border-slate-50 dark:border-slate-800 cursor-pointer transition-colors ${selectedRoleId === role.tid ? 'bg-blue-50 dark:bg-blue-950/40' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
                     <td className="px-6 py-4 text-center">
-                      <input type="radio" name="roleSelection" checked={selectedRoleId === role.tid} onChange={() => setSelectedRoleId(role.tid)} className="w-4 h-4 text-blue-600 cursor-pointer" />
+                      <input type="radio" name="roleSelection" checked={selectedRoleId === role.tid} onChange={() => setSelectedRoleId(role.tid)} className="w-4 h-4 text-blue-600 dark:text-blue-400 cursor-pointer" />
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{role.tid}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-800">{role.roleName}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{role.description}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{role.createUser}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{role.tid}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-800 dark:text-slate-100">{role.roleName}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{role.description}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{role.createUser}</td>
                   </tr>
                 ))
               )}
@@ -372,8 +372,8 @@ export default function RoleManagementPage() {
         </div>
 
         {/* Basic Pagination Controls */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-          <span className="text-sm text-slate-500">Total {total} records</span>
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800">
+          <span className="text-sm text-slate-500 dark:text-slate-400">Total {total} records</span>
           
           <div className="flex items-center gap-4">
             {/* Page Size Selector */}
@@ -383,7 +383,7 @@ export default function RoleManagementPage() {
                 setPageSize(Number(e.target.value));
                 setPageIndex(1); 
               }}
-              className="px-3 py-1.5 border border-slate-200 text-slate-900 rounded text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded text-sm bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
             >
               <option value={10}>10 per page</option>
               <option value={25}>25 per page</option>
@@ -397,14 +397,14 @@ export default function RoleManagementPage() {
               <button 
                 disabled={pageIndex === 1} 
                 onClick={() => setPageIndex(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Previous
               </button>
               <button 
                 disabled={pageIndex * pageSize >= total} 
                 onClick={() => setPageIndex(p => p + 1)}
-                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Next
               </button>
@@ -428,16 +428,16 @@ export default function RoleManagementPage() {
       >
         <div className="space-y-5">
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700">Role Name <span className="text-red-500">*</span></label>
-            <input type="text" value={formData.roleName} onChange={(e) => setFormData({...formData, roleName: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter unique role name" />
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Role Name <span className="text-red-500 dark:text-red-400">*</span></label>
+            <input type="text" value={formData.roleName} onChange={(e) => setFormData({...formData, roleName: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter unique role name" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700">Description</label>
-            <input type="text" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter role description" />
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Description</label>
+            <input type="text" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:bg-slate-800 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Enter role description" />
           </div>
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            <label className="text-sm font-semibold text-slate-700">Select Menu Permissions:</label>
-            <div className="p-4 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg max-h-64 overflow-y-auto">
+          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Select Menu Permissions:</label>
+            <div className="p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 rounded-lg max-h-64 overflow-y-auto">
               {treeLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="animate-spin text-blue-500" /></div>
               ) : (
@@ -551,10 +551,10 @@ function TreeNode({
 
   return (
     <div className="select-none">
-      <div className="flex items-center gap-1.5 py-1.5 hover:bg-slate-200/50 rounded px-1 transition-colors">
+      <div className="flex items-center gap-1.5 py-1.5 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded px-1 transition-colors">
         <div style={{ paddingLeft: `${level * 20}px` }} className="flex items-center">
           {showChevron ? (
-            <button onClick={handleToggleExpand} disabled={isLoading} className="p-0.5 text-slate-500 hover:text-slate-800 disabled:opacity-50">
+            <button onClick={handleToggleExpand} disabled={isLoading} className="p-0.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50">
               {isLoading ? <Loader2 size={14} className="animate-spin" /> : (isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />)}
             </button>
           ) : (
@@ -566,11 +566,11 @@ function TreeNode({
           type="checkbox" 
           checked={isChecked}
           onChange={handleCheckboxChange} 
-          className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer mt-0.5"
+          className="w-4 h-4 text-blue-600 dark:text-blue-400 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer mt-0.5"
           id={`node-${node.tid}`}
         />
         
-        <label htmlFor={`node-${node.tid}`} className="text-sm cursor-pointer text-slate-700">
+        <label htmlFor={`node-${node.tid}`} className="text-sm cursor-pointer text-slate-700 dark:text-slate-300">
           {node.name}
         </label>
       </div>

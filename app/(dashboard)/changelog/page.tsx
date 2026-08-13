@@ -3,33 +3,33 @@
 import { CHANGELOG, ChangeType } from '@/constants/changelog';
 
 const TYPE_STYLE: Record<ChangeType, { label: string; className: string }> = {
-  feat:     { label: 'Feature',  className: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
-  fix:      { label: 'Fix',      className: 'bg-amber-50  text-amber-700  ring-1 ring-amber-200'  },
-  security: { label: 'Security', className: 'bg-red-50    text-red-700    ring-1 ring-red-200'    },
-  chore:    { label: 'Chore',    className: 'bg-slate-100 text-slate-600  ring-1 ring-slate-200'  },
-  docs:     { label: 'Docs',     className: 'bg-blue-50   text-blue-700   ring-1 ring-blue-200'   },
+  feat:     { label: 'Feature',  className: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-800/60' },
+  fix:      { label: 'Fix',      className: 'bg-amber-50  dark:bg-amber-950/40 text-amber-700  dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800/60'  },
+  security: { label: 'Security', className: 'bg-red-50    dark:bg-red-950/40 text-red-700    dark:text-red-400 ring-1 ring-red-200 dark:ring-red-800/60'    },
+  chore:    { label: 'Chore',    className: 'bg-slate-100 dark:bg-slate-800 text-slate-600  dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700'  },
+  docs:     { label: 'Docs',     className: 'bg-blue-50   dark:bg-blue-950/40 text-blue-700   dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-800/60'   },
 };
 
 export default function ChangelogPage() {
   return (
     <div className="max-w-3xl mx-auto py-4">
       <div className="mb-10">
-        <h1 className="text-2xl font-bold text-slate-800">Release Notes</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Release Notes</h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Full history of changes across all versions of this application.
         </p>
       </div>
 
       <div className="relative">
         {/* 竖向时间轴线 */}
-        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-200" />
+        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-slate-700" />
 
         <ol className="space-y-10">
           {CHANGELOG.map((release, idx) => (
             <li key={release.version} className="relative pl-8">
               {/* 时间轴圆点 */}
-              <div className={`absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full border-2 border-white ring-2 ${
-                idx === 0 ? 'bg-[#4db694] ring-[#4db694]' : 'bg-slate-300 ring-slate-300'
+              <div className={`absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full border-2 border-white dark:border-slate-950 ring-2 ${
+                idx === 0 ? 'bg-[#4db694] ring-[#4db694]' : 'bg-slate-300 dark:bg-slate-600 ring-slate-300 dark:ring-slate-600'
               }`} />
 
               {/* 版本头部 */}
@@ -37,13 +37,13 @@ export default function ChangelogPage() {
                 <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
                   idx === 0
                     ? 'bg-[#4db694] text-white'
-                    : 'bg-slate-100 text-slate-700'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}>
                   v{release.version}
                 </span>
-                <span className="text-xs text-slate-400">{release.date}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">{release.date}</span>
                 {release.highlight && (
-                  <span className="text-sm text-slate-500 italic">— {release.highlight}</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 italic">— {release.highlight}</span>
                 )}
               </div>
 
@@ -56,9 +56,9 @@ export default function ChangelogPage() {
                       <span className={`mt-0.5 shrink-0 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${style.className}`}>
                         {style.label}
                       </span>
-                      <span className="text-slate-600 leading-snug">
+                      <span className="text-slate-600 dark:text-slate-300 leading-snug">
                         {change.scope && (
-                          <span className="font-medium text-slate-800 mr-1">{change.scope}</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-100 mr-1">{change.scope}</span>
                         )}
                         {change.description}
                       </span>

@@ -185,7 +185,7 @@ export default function LoginPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Loader2 className="animate-spin text-[#4db694] mb-4" size={48} />
-        <p className="text-[#666]">Checking secure session...</p>
+        <p className="text-[#666] dark:text-slate-400">Checking secure session...</p>
       </div>
     );
   }
@@ -193,14 +193,14 @@ export default function LoginPage() {
   return (
     <>
       <div className="mb-2">
-        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+        <h2 className="text-[26px] font-bold text-[#333] dark:text-slate-100 text-center p-[10px] m-0">
           Sign In
         </h2>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+          <div className="bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 p-2 rounded text-xs border border-red-100 dark:border-red-900/60 text-center">
             {error}
           </div>
         )}
@@ -209,7 +209,7 @@ export default function LoginPage() {
           <input
             {...register("username", { required: "Please enter your username" })}
             placeholder="UserName"
-            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
         </div>
 
@@ -218,12 +218,12 @@ export default function LoginPage() {
             {...register("password", { required: "Please enter your password" })}
             type="password"
             placeholder="******"
-            className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+            className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
         </div>
 
         <div className="text-right mt-4">
-          <Link href="/forgot-password" className="text-[#7a94ff] text-[15px] hover:underline">
+          <Link href="/forgot-password" className="text-[#7a94ff] dark:text-[#93a9ff] text-[15px] hover:underline">
             Forgot password?
           </Link>
         </div>
@@ -239,17 +239,17 @@ export default function LoginPage() {
         {/* 🚀 核心逻辑 3：指向你同事写的 UC 中转链接 */}
         {/* 注意：把 r= 后面的地址换成你 Next.js 本地的调试地址，比如 localhost:3000/login */}
         <div className="text-right mt-4">
-          <Link 
-            href="https://uc.crownbio.com/sysuser/loginazure?r=cbsz-bioweb3.crownbio.com:455/login&s=1&l=en" 
-            className="text-[#7a94ff] text-[15px] hover:underline font-medium"
+          <Link
+            href="https://uc.crownbio.com/sysuser/loginazure?r=cbsz-bioweb3.crownbio.com:455/login&s=1&l=en"
+            className="text-[#7a94ff] dark:text-[#93a9ff] text-[15px] hover:underline font-medium"
           >
             Sign In With Azure
           </Link>
         </div>
 
-        <div className="text-right mt-2 text-[15px] text-[#666]">
+        <div className="text-right mt-2 text-[15px] text-[#666] dark:text-slate-400">
           Don't have an account?{' '}
-          <Link href="/signup" className="text-[#7a94ff] hover:underline">
+          <Link href="/signup" className="text-[#7a94ff] dark:text-[#93a9ff] hover:underline">
             Create an account
           </Link>
         </div>
@@ -261,14 +261,14 @@ export default function LoginPage() {
             key={key}
             type="button"
             onClick={() => setActiveDoc(key)}
-            className="text-xs text-[#999] hover:text-[#4db694] hover:underline transition-colors"
+            className="text-xs text-[#999] dark:text-slate-500 hover:text-[#4db694] hover:underline transition-colors"
           >
             {DOC_CONFIG[key].title}
           </button>
         ))}
       </div>
 
-      <p className="mt-2 text-[10px] text-gray-300 text-center select-none">
+      <p className="mt-2 text-[10px] text-gray-300 dark:text-slate-600 text-center select-none">
         v{process.env.NEXT_PUBLIC_APP_VERSION}
       </p>
 

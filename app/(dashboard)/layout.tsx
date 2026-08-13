@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOut, ChevronDown, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -91,9 +92,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 w-full bg-slate-900 text-slate-300 shadow-md">
+      <header className="sticky top-0 z-50 w-full bg-slate-900 dark:bg-slate-950 dark:border-b dark:border-slate-800 text-slate-300 shadow-md">
         <div className="w-full px-6 h-16 flex items-center justify-between relative">
           
           {/* 1. 左侧 Logo */}
@@ -132,16 +133,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                   {/* 传统上下结构的下拉子菜单 */}
                   {hasSubmenu && (
-                    <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-xl py-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-[60]">
-                      <div className="absolute top-[-6px] left-6 w-3 h-3 bg-white border-t border-l border-slate-200 rotate-45"></div>
+                    <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-[60]">
+                      <div className="absolute top-[-6px] left-6 w-3 h-3 bg-white dark:bg-slate-800 border-t border-l border-slate-200 dark:border-slate-700 rotate-45"></div>
                       {item.routes!.map(sub => (
                         <Link
                           key={sub.path}
                           href={sub.path}
                           className={`block px-4 py-2.5 text-sm transition-colors ${
-                            pathname === sub.path 
-                              ? 'text-[#4db694] bg-slate-50 font-semibold' 
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-[#4db694]'
+                            pathname === sub.path
+                              ? 'text-[#4db694] bg-slate-50 dark:bg-slate-700/60 font-semibold'
+                              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:text-[#4db694]'
                           }`}
                         >
                           {sub.name}
@@ -155,7 +156,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* 3. 右侧 用户信息 */}
-          <div className="flex items-center gap-4 z-10">
+          <div className="flex items-center gap-3 z-10">
+            <ThemeToggle className="text-slate-300 hover:bg-slate-800 dark:hover:bg-slate-800" />
+
             <div className="relative group">
               <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-full border border-slate-700 transition-colors">
                 <div className="w-7 h-7 rounded-full bg-[#4db694] flex items-center justify-center text-xs font-bold text-white uppercase">
@@ -168,32 +171,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
 
               {/* 用户下拉菜单 */}
-              <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-xl py-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-[60]">
-                <div className="absolute top-[-6px] right-6 w-3 h-3 bg-white border-t border-l border-slate-200 rotate-45"></div>
+              <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-[60]">
+                <div className="absolute top-[-6px] right-6 w-3 h-3 bg-white dark:bg-slate-800 border-t border-l border-slate-200 dark:border-slate-700 rotate-45"></div>
 
                 <Link
                   href="/configuration/profile"
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-[#4db694] transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:text-[#4db694] transition-colors"
                 >
                   <UserIcon size={16} />
                   Profile
                 </Link>
 
-                <div className="h-px bg-slate-100 my-1 mx-2"></div>
+                <div className="h-px bg-slate-100 dark:bg-slate-700 my-1 mx-2"></div>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                 >
                   <LogOut size={16} />
                   Logout
                 </button>
 
-                <div className="h-px bg-slate-100 my-1 mx-2"></div>
+                <div className="h-px bg-slate-100 dark:bg-slate-700 my-1 mx-2"></div>
 
                 <Link
                   href="/changelog"
-                  className="block px-4 py-1.5 text-[10px] text-slate-400 text-center hover:text-[#4db694] transition-colors"
+                  className="block px-4 py-1.5 text-[10px] text-slate-400 dark:text-slate-500 text-center hover:text-[#4db694] transition-colors"
                 >
                   v{process.env.NEXT_PUBLIC_APP_VERSION}
                 </Link>
@@ -211,7 +214,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </main>
 
       {/* 页脚 */}
-      <footer className="py-4 text-center text-slate-400 text-xs border-t border-slate-200 bg-white">
+      <footer className="py-4 text-center text-slate-400 dark:text-slate-500 text-xs border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         © 2026 Crown Bioscience Inc. All rights reserved.
       </footer>
     </div>

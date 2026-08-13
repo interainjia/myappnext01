@@ -57,12 +57,12 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <div className="mb-4">
-        <h2 className="text-[26px] font-bold text-[#333] text-center p-[10px] m-0">
+        <h2 className="text-[26px] font-bold text-[#333] dark:text-slate-100 text-center p-[10px] m-0">
           Forgot Password
         </h2>
-        <p className="text-sm text-[#666] text-center px-4">
-          {isSent 
-            ? "A password reset link has been sent to your email." 
+        <p className="text-sm text-[#666] dark:text-slate-400 text-center px-4">
+          {isSent
+            ? "A password reset link has been sent to your email."
             : "Enter your email address and we'll send you a link to reset your password."}
         </p>
       </div>
@@ -71,15 +71,15 @@ export default function ForgotPasswordPage() {
         <>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {error && (
-              <div className="bg-red-50 text-red-500 p-2 rounded text-xs border border-red-100 text-center">
+              <div className="bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 p-2 rounded text-xs border border-red-100 dark:border-red-900/60 text-center">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-[#333] mb-1">Email Address</label>
+              <label className="block text-sm font-medium text-[#333] dark:text-slate-300 mb-1">Email Address</label>
               <input
-                {...register("email", { 
+                {...register("email", {
                   required: "Please enter your email",
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -87,10 +87,10 @@ export default function ForgotPasswordPage() {
                   }
                 })}
                 placeholder="Please enter your email"
-                className="w-full h-12 px-4 rounded bg-[#eef2f9] border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900"
+                className="w-full h-12 px-4 rounded bg-[#eef2f9] dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-[#4db694] transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email.message as string}</p>
+                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.email.message as string}</p>
               )}
             </div>
 
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
 
           {/* 👈 发送成功前（未发送状态下），显示底部的返回链接 */}
           <div className="text-right mt-6">
-            <Link href="/login" className="text-[#7a94ff] text-[15px] hover:underline flex items-center justify-end gap-1">
+            <Link href="/login" className="text-[#7a94ff] dark:text-[#93a9ff] text-[15px] hover:underline flex items-center justify-end gap-1">
               <ArrowLeft size={14} /> Return to Login
             </Link>
           </div>

@@ -118,10 +118,10 @@ export default function MenuManagementPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* 顶部操作 */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+      <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Menu Management</h2>
-          <p className="text-slate-500">Configure hierarchical navigation and system actions.</p>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Menu Management</h2>
+          <p className="text-slate-500 dark:text-slate-400">Configure hierarchical navigation and system actions.</p>
         </div>
         <button 
           onClick={() => { setEditingMenu({ parentTid: 0, isActive: true }); setIsModalOpen(true); }}
@@ -132,14 +132,14 @@ export default function MenuManagementPage() {
       </div>
 
       {/* 列表渲染 */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-100">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-700">
             <tr>
-              <th className="px-6 py-4 text-sm font-semibold text-slate-600">Menu Structure</th>
-              <th className="px-6 py-4 text-sm font-semibold text-slate-600">Path</th>
-              <th className="px-6 py-4 text-sm font-semibold text-slate-600 text-center">Sort</th>
-              <th className="px-6 py-4 text-sm font-semibold text-slate-600 text-right">Actions</th>
+              <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Menu Structure</th>
+              <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Path</th>
+              <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">Sort</th>
+              <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -169,35 +169,35 @@ export default function MenuManagementPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Name <span className="text-red-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Name <span className="text-red-500 dark:text-red-400">*</span>
             </label>
             <input
               type="text"
               value={editingMenu?.name || ''}
               onChange={(e) => setEditingMenu(prev => ({ ...prev, name: e.target.value }))}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 dark:bg-slate-800 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Enter menu name"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Path (URL)</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Path (URL)</label>
             <input
               type="text"
               value={editingMenu?.url || ''}
               onChange={(e) => setEditingMenu(prev => ({ ...prev, url: e.target.value }))}
-              className="w-full px-4 py-2 border border-slate-200 text-slate-900 placeholder-slate-500 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono text-sm"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 dark:bg-slate-800 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono text-sm"
               placeholder="/path/to/page"
             />
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Sort Order</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Sort Order</label>
               <input
                 type="number"
                 value={editingMenu?.orderRule ?? 0}
                 onChange={(e) => setEditingMenu(prev => ({ ...prev, orderRule: Number(e.target.value) }))}
-                className="w-full px-4 py-2 border border-slate-200 text-slate-900 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 dark:bg-slate-800 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 min={0}
               />
             </div>
@@ -207,9 +207,9 @@ export default function MenuManagementPage() {
                 id="menu-isActive"
                 checked={editingMenu?.isActive ?? true}
                 onChange={(e) => setEditingMenu(prev => ({ ...prev, isActive: e.target.checked }))}
-                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                className="w-4 h-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer"
               />
-              <label htmlFor="menu-isActive" className="text-sm font-semibold text-slate-700 cursor-pointer select-none">Active</label>
+              <label htmlFor="menu-isActive" className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">Active</label>
             </div>
           </div>
         </div>
@@ -280,7 +280,7 @@ function MenuRow({ node, level, onEdit, onDelete }: {
 
   return (
     <>
-      <tr className="hover:bg-slate-50/80 group border-b border-slate-50">
+      <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 group border-b border-slate-50 dark:border-slate-800">
         {/* 左侧：菜单结构名称 */}
         <td className="px-6 py-4">
           <div className="flex items-center" style={{ paddingLeft: `${level * 20}px` }}>
@@ -288,22 +288,22 @@ function MenuRow({ node, level, onEdit, onDelete }: {
               <button 
                 onClick={handleToggleExpand} 
                 disabled={isLoading}
-                className="p-1 mr-1 text-slate-400 hover:text-slate-600 disabled:opacity-50"
+                className="p-1 mr-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50"
               >
                 {isLoading ? <Loader2 size={14} className="animate-spin" /> : (isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />)}
               </button>
             ) : <span className="w-6" />}
-            <span className={`text-sm ${level === 0 ? 'font-bold text-slate-700' : 'text-slate-600'}`}>
+            <span className={`text-sm ${level === 0 ? 'font-bold text-slate-700 dark:text-slate-300' : 'text-slate-600 dark:text-slate-300'}`}>
               {node.name}
             </span>
           </div>
         </td>
         
         {/* 路径 */}
-        <td className="px-6 py-4 text-xs font-mono text-slate-400">{node.url}</td>
+        <td className="px-6 py-4 text-xs font-mono text-slate-400 dark:text-slate-500">{node.url}</td>
         
         {/* 排序 */}
-        <td className="px-6 py-4 text-center text-sm text-slate-500">{node.orderRule}</td>
+        <td className="px-6 py-4 text-center text-sm text-slate-500 dark:text-slate-400">{node.orderRule}</td>
         
         {/* 右侧：操作按钮 */}
         <td className="px-6 py-4 text-right">
@@ -315,8 +315,8 @@ function MenuRow({ node, level, onEdit, onDelete }: {
                 disabled={isLoading}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${
                   isExpanded 
-                    ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                    ? 'bg-orange-100 text-orange-600 hover:bg-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:hover:bg-orange-900/40'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/40'
                 }`}
               >
                 {isLoading ? <Loader2 size={12} className="animate-spin" /> : null}
