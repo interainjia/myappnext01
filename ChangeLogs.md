@@ -249,3 +249,58 @@ menu / permission 页面的 modal 此前仅有状态声明但无 UI 实现，此
 
 **后续建议**
 根本性修复需联系 UC 服务器团队，确认是否提供 SSO 登出接口（如 `https://uc.crownbio.com/sysuser/logout?r=...`）。如果存在，logout 流程应改为先跳转到 UC 登出页清除 Azure SSO Session，再回跳到 `/login?loggedOut=true`。
+
+---
+---
+# 2026.06.14 — Foundation release (v1.0.0)
+
+## 新增
+- **GlassModal**：新增可复用的 GlassModal 组件（Framer Motion 动画、Portal 渲染、背景模糊、4 种尺寸）。
+- 全站替换所有手写 inline modal 为 GlassModal。
+- 新增请求中间件、Refresh Token 支持、Fetch 超时处理、全局 ErrorBoundary 组件。
+
+## 修复
+- **Profile**：修复 API 返回字段（eid、userName、phone）大小写不一致的问题。
+- **Auth**：修复 Azure SSO 登出后触发自动重新登录的问题。
+
+## 安全
+- 将密码重置 Token 由纯 Base64 编码改为 AES-256 加密 + 服务端随机 Token 存储。
+
+---
+---
+# 2026.06.15 — Policy documents & asset updates (v1.1.0)
+
+## 新增
+- **登录页**：在登录表单底部新增 Terms Of Use、Privacy Policy、Acceptable Use Policy 链接，点击后以 GlassModal 打开对应 PDF。
+
+## 杂项
+- 更新登录页背景图（cbbg.png）。
+- `.gitignore` 新增 `*:Zone.Identifier`，避免 Windows 元数据文件被提交。
+- 清理此前误提交到 `public/docs/` 目录下的 Windows `Zone.Identifier` 元数据文件。
+
+---
+---
+# 2026.06.16 — Version tracking & company font (v1.2.0)
+
+## 新增
+- **Release Notes 页面**：新增 `/changelog` 页面，采用竖向时间轴 UI，展示所有版本、日期及分类变更条目（Feature / Fix / Security / Chore / Docs）。
+- **版本号展示**：登录页底部与用户下拉菜单中展示当前版本号（读取自 `package.json` 的 `NEXT_PUBLIC_APP_VERSION`），下拉菜单中的版本号可直接跳转到 Release Notes 页面。
+- **字体 — Avenir Next LT Pro**：将占位用的 Arial 替换为公司专属的可变字体（`AvenirNextVariableRoman` + `AvenirNextVariableItalic`），覆盖字重 100–900，更新了 Tailwind 的 `--font-sans` 与 body 字体。
+
+---
+---
+# 2026.08.13
+
+## feat(ui): 全站深色/浅色主题切换（右上角太阳/月亮图标）
+
+### 新增
+- **`components/ThemeProvider.tsx`**：主题 Context，负责在 `<html>` 上切换 `.dark` class，并将用户选择持久化到 localStorage；同时导出一段内联脚本（`themeInitScript`），在 React hydrate 之前同步设置好主题，避免切换时出现闪烁（FOUC）。
+- **`components/ui/ThemeToggle.tsx`**：太阳/月亮切换按钮（lucide-react 图标 + 旋转淡入淡出过渡动画）。
+- 在根布局 `app/layout.tsx`、`(dashboard)/layout.tsx`、`(auth)/layout.tsx` 以及首页 `app/page.tsx` 的右上角都接入了该切换按钮。
+
+### 改动
+- **`app/globals.css`**：新增 `@custom-variant dark (&:where(.dark, .dark *));`，使 `dark:` 变体跟随 `.dark` class 手动切换，而不是系统的 `prefers-color-scheme`。
+- 全站约 20 个页面与组件（登录 / 注册 / 忘记密码 / 重置密码、Configuration 下的 6 个管理页面、Dashboard 系列页面、Toaster、GlassModal、ErrorBoundary 等）都补齐了对应的 `dark:` 样式，颜色映射遵循统一规则（背景、文字、边框、状态色分级），确保深色模式下视觉观感一致。
+
+### 验证
+- `tsc --noEmit` 与 `npm run build` 均通过，20 个路由静态生成成功；并启动 dev server 检查了首页 / 登录页的 SSR 输出，确认防闪烁脚本与切换按钮均正常渲染。
